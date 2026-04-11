@@ -7,6 +7,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      /** Local FastAPI: `GET /api/v1/*` */
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
       '/aparu-proxy': {
         target: 'http://testtaxi3.aparu.kz',
         changeOrigin: true,

@@ -12,10 +12,13 @@ export function HomeBottomSheet({
   reverseLoading,
   reverseError,
   reverseData,
+  entryAddress,
 }: {
   reverseLoading: boolean
   reverseError: Error | null
   reverseData: ReverseGeocodeResponse | undefined
+  /** Адрес из `GET /api/v1/entry` (Aparu reverse-geocode на бэкенде) */
+  entryAddress?: string | null
 }) {
   const pickup = useRideStore((s) => s.pickup)
   const pickupAddress = useRideStore((s) => s.pickupAddress)
@@ -27,7 +30,9 @@ export function HomeBottomSheet({
 
   const routeQ = useTripRoute()
   const displayAddress =
-    pickupAddress || (reverseData ? formatAddressFromReverse(reverseData) : '')
+    (entryAddress && entryAddress.trim()) ||
+    pickupAddress ||
+    (reverseData ? formatAddressFromReverse(reverseData) : '')
 
   const canOrder =
     rideLifecycle === 'idle' &&

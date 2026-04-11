@@ -1,3 +1,4 @@
+import { useAuthStore } from '../../store/authStore'
 import { useBonusStore } from '../../store/bonusStore'
 import { cn } from '../../utils/cn'
 
@@ -8,7 +9,10 @@ export function BonusBadge({
   onOpen: () => void
   className?: string
 }) {
-  const balance = useBonusStore((s) => s.balance)
+  const token = useAuthStore((s) => s.accessToken)
+  const serverBal = useAuthStore((s) => s.bonusBalance)
+  const localBal = useBonusStore((s) => s.balance)
+  const balance = token && serverBal != null ? serverBal : localBal
 
   return (
     <button

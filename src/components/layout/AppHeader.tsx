@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom'
 import { BonusBadge } from '../../features/bonus/BonusBadge'
+import { useAuthStore } from '../../store/authStore'
 import { useUiStore } from '../../store/uiStore'
-
 export function AppHeader() {
   const setBonusScreenOpen = useUiStore((s) => s.setBonusScreenOpen)
+  const token = useAuthStore((s) => s.accessToken)
+  const role = useAuthStore((s) => s.role)
+  const clearSession = useAuthStore((s) => s.clearSession)
 
   return (
     <header
@@ -15,6 +19,32 @@ export function AppHeader() {
         <span className="truncate text-base font-semibold tracking-tight text-graphite-900 sm:text-lg">
           QR Taxi
         </span>
+        <div className="pointer-events-auto mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold sm:text-xs">
+          {!token && (
+            <Link className="text-aparu-dark hover:underline" to="/auth/login">
+              Войти
+            </Link>
+          )}
+          {token && role === 'admin' && (
+            <Link className="text-aparu-dark hover:underline" to="/admin/dashboard">
+              Admin
+            </Link>
+          )}
+          {token && role === 'driver' && (
+            <Link className="text-aparu-dark hover:underline" to="/driver/active-rides">
+              Водитель
+            </Link>
+          )}
+          {token && (
+            <button
+              type="button"
+              className="text-graphite-500 hover:text-graphite-800"
+              onClick={() => clearSession()}
+            >
+              Выйти
+            </button>
+          )}
+        </div>
       </div>
       <div className="pointer-events-auto">
         <BonusBadge onOpen={() => setBonusScreenOpen(true)} />
