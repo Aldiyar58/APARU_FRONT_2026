@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { FaCreditCard, FaLock, FaTaxi } from 'react-icons/fa6'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { Input } from '../../components/ui/Input'
+import { sendOtpCode, verifyOtp } from '../../services/backend/authApi'
 import { createRide } from '../../services/backend/rideApi'
 import { useAuthStore } from '../../store/authStore'
 import { useRideStore } from '../../store/rideStore'
@@ -31,11 +34,86 @@ export function ConfirmRideModal() {
   const setRoute = useRideStore((s) => s.setRoute)
   const tariff = useRideStore((s) => s.tariff)
   const paymentMethod = useRideStore((s) => s.paymentMethod)
+  const pendingOrder = useRideStore((s) => s.pendingOrder)
+  const setPendingOrder = useRideStore((s) => s.setPendingOrder)
   const accessToken = useAuthStore((s) => s.accessToken)
+  const setSession = useAuthStore((s) => s.setSession)
   const pushToast = useUiStore((s) => s.pushToast)
+
   const [submitting, setSubmitting] = useState(false)
 
+  /* ── Inline auth state ── */
+  const [authStep, setAuthStep] = useState<'phone' | 'code'>('phone')
+  const [phone, setPhone] = useState('')
+  const [code, setCode] = useState('')
+  const [ttl, setTtl] = useState<number | null>(null)
+  const [authBusy, setAuthBusy] = useState(false)
+
+  const canSend = useMemo(() => phone.trim().length >= 5, [phone])
+  const canVerify = useMemo(
+    () => phone.trim().length >= 5 && code.trim().length >= 4,
+    [phone, code],
+  )
+
+  /* TTL countdown */
+  useEffect(() => {
+    if (ttl == null) return
+    if (ttl <= 0) {
+      setTtl(null)
+      return
+    }
+    const id = setInterval(() => {
+      setTtl((t) => (t != null ? t - 1 : t))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [ttl])
+
+  /* Reset inline auth when modal closes */
+  useEffect(() => {
+    if (!open) {
+      setAuthStep('phone')
+      setPhone('')
+      setCode('')
+      setTtl(null)
+      setAuthBusy(false)
+    }
+  }, [open])
+
+  /* Auto-submit ride after user just authenticated */
+  useEffect(() => {
+    if (!pendingOrder || !accessToken || !open) return
+    if (!pickup || !destination) return
+
+    setPendingOrder(false)
+    setSubmitting(true)
+
+    createRide({ pointA: pickup, pointB: destination, tariff, paymentMethod })
+      .then((response) => {
+        if (response.route) setRoute(response.route)
+        applyRide(response.ride)
+        pushToast(`Поездка #${response.ride.id} создана.`, 'success')
+      })
+      .catch((error) => {
+        pushToast((error as Error).message, 'error')
+      })
+      .finally(() => setSubmitting(false))
+  }, [
+    pendingOrder,
+    accessToken,
+    open,
+    pickup,
+    destination,
+    tariff,
+    paymentMethod,
+    setPendingOrder,
+    setRoute,
+    applyRide,
+    pushToast,
+  ])
+
   if (!open) return null
+
+  const isGuest = !accessToken
 
   return (
     <div
@@ -70,12 +148,12 @@ export function ConfirmRideModal() {
                 <span className="shrink-0 font-medium text-graphite-400">B</span>
                 <span className="min-w-0 break-words text-graphite-800">{destinationLabel || 'Место назначения'}</span>
               </li>
-              <li className="flex gap-2">
-                <span className="shrink-0 font-medium text-graphite-400">🚕</span>
+              <li className="flex gap-2 items-center">
+                <span className="shrink-0 font-medium text-graphite-400"><FaTaxi /></span>
                 <span className="text-graphite-800">{TARIFF_LABELS[tariff] ?? tariff}</span>
               </li>
-              <li className="flex gap-2">
-                <span className="shrink-0 font-medium text-graphite-400">💳</span>
+              <li className="flex gap-2 items-center">
+                <span className="shrink-0 font-medium text-graphite-400"><FaCreditCard /></span>
                 <span className="text-graphite-800">{PAYMENT_LABELS[paymentMethod] ?? paymentMethod}</span>
               </li>
               <li className="flex flex-wrap gap-2 pt-1 text-graphite-600">
@@ -84,44 +162,128 @@ export function ConfirmRideModal() {
                 <span>{formatDurationMs(route?.Time)}</span>
               </li>
             </ul>
+
+            {/* ── Inline auth form for guests ── */}
+            {isGuest && (
+              <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="mb-3 text-sm font-medium text-amber-800 flex items-center gap-1.5">
+                  <FaLock className="shrink-0" /> Для создания заказа необходимо войти в аккаунт
+                </p>
+
+                {authStep === 'phone' && (
+                  <div className="space-y-2.5">
+                    <Input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+7..."
+                      className="bg-white"
+                    />
+                    <Button
+                      type="button"
+                      className="min-h-11 w-full text-[14px]"
+                      disabled={!canSend || authBusy}
+                      onClick={async () => {
+                        setAuthBusy(true)
+                        try {
+                          const r = await sendOtpCode(phone.trim())
+                          setTtl(r.ttl_seconds)
+                          setAuthStep('code')
+                          pushToast('Код отправлен', 'success')
+                        } catch (e) {
+                          pushToast((e as Error).message, 'error')
+                        } finally {
+                          setAuthBusy(false)
+                        }
+                      }}
+                    >
+                      {authBusy ? 'Отправка...' : 'Получить код'}
+                    </Button>
+                  </div>
+                )}
+
+                {authStep === 'code' && (
+                  <div className="space-y-2.5">
+                    <Input
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      inputMode="numeric"
+                      placeholder="0000"
+                      className="bg-white"
+                    />
+                    <Button
+                      type="button"
+                      className="min-h-11 w-full text-[14px]"
+                      disabled={!canVerify || authBusy}
+                      onClick={async () => {
+                        setAuthBusy(true)
+                        try {
+                          const r = await verifyOtp(phone.trim(), code.trim())
+                          setPendingOrder(true)
+                          setSession(r.access_token)
+                          pushToast('Вы авторизованы! Создаём заказ...', 'success')
+                        } catch (e) {
+                          pushToast((e as Error).message, 'error')
+                        } finally {
+                          setAuthBusy(false)
+                        }
+                      }}
+                    >
+                      {authBusy ? 'Проверка...' : 'Войти и заказать'}
+                    </Button>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        className="text-xs text-graphite-500 hover:underline"
+                        onClick={() => setAuthStep('phone')}
+                      >
+                        Изменить номер
+                      </button>
+                      {ttl != null && ttl > 0 && (
+                        <p className="text-xs text-graphite-500">
+                          Код действует {ttl} сек.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="shrink-0 space-y-2 border-t border-graphite-100 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:border-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:pt-6">
             <div className="flex flex-col gap-2 sm:flex-row-reverse">
-              <Button
-                className="min-h-12 w-full sm:min-h-0 sm:flex-1"
-                disabled={submitting}
-                onClick={async () => {
-                  if (!accessToken) {
-                    pushToast('Войдите перед созданием поездки.', 'info')
-                    return
-                  }
-                  if (!pickup || !destination) {
-                    pushToast('Укажите обе точки маршрута.', 'error')
-                    return
-                  }
-
-                  setSubmitting(true)
-                  try {
-                    const response = await createRide({
-                      pointA: pickup,
-                      pointB: destination,
-                      tariff,
-                      paymentMethod,
-                    })
-                    if (response.route) {
-                      setRoute(response.route)
+              {!isGuest && (
+                <Button
+                  className="min-h-12 w-full sm:min-h-0 sm:flex-1"
+                  disabled={submitting}
+                  onClick={async () => {
+                    if (!pickup || !destination) {
+                      pushToast('Укажите обе точки маршрута.', 'error')
+                      return
                     }
-                    applyRide(response.ride)
-                    pushToast(`Поездка #${response.ride.id} создана.`, 'success')
-                  } catch (error) {
-                    pushToast((error as Error).message, 'error')
-                  } finally {
-                    setSubmitting(false)
-                  }
-                }}
-              >
-                {submitting ? 'Создание...' : 'Подтвердить'}
-              </Button>
+
+                    setSubmitting(true)
+                    try {
+                      const response = await createRide({
+                        pointA: pickup,
+                        pointB: destination,
+                        tariff,
+                        paymentMethod,
+                      })
+                      if (response.route) {
+                        setRoute(response.route)
+                      }
+                      applyRide(response.ride)
+                      pushToast(`Поездка #${response.ride.id} создана.`, 'success')
+                    } catch (error) {
+                      pushToast((error as Error).message, 'error')
+                    } finally {
+                      setSubmitting(false)
+                    }
+                  }}
+                >
+                  {submitting ? 'Создание...' : 'Подтвердить'}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 className="min-h-12 w-full sm:min-h-0 sm:flex-1"

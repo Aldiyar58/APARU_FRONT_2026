@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { FaLocationDot } from 'react-icons/fa6'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
@@ -132,8 +133,8 @@ export function DriverActiveRidesPage() {
             <p className="mt-1 text-sm text-graphite-500">Статус: {activeRide.status}</p>
             <p className="mt-2 text-sm text-graphite-700">{coordsLabel(activeRide)}</p>
             {driverPos && (
-              <p className="mt-1 text-sm font-medium text-aparu-dark">
-                📍 {distanceLabel(driverPos, activeRide)}
+              <p className="mt-1 text-sm font-medium text-aparu-dark flex items-center gap-1">
+                <FaLocationDot /> {distanceLabel(driverPos, activeRide)}
               </p>
             )}
           </div>
@@ -181,7 +182,7 @@ export function DriverActiveRidesPage() {
                     <p className="font-medium text-graphite-900">Заказ #{ride.id}</p>
                     <p className="mt-1 text-sm text-graphite-500">{coordsLabel(ride)}</p>
                     {dist && (
-                      <p className="mt-1 text-sm font-medium text-aparu-dark">📍 {dist}</p>
+                      <p className="mt-1 text-sm font-medium text-aparu-dark flex items-center gap-1"><FaLocationDot /> {dist}</p>
                     )}
                   </div>
                   <Button

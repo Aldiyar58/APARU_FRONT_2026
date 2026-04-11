@@ -11,7 +11,7 @@ function RoleRedirect() {
   const role = useAuthStore((s) => s.role)
   const accessToken = useAuthStore((s) => s.accessToken)
 
-  if (!accessToken) return <Navigate to="/auth/login" replace />
+  if (!accessToken) return <Navigate to="/home" replace />
   if (role === 'admin') return <Navigate to="/admin/dashboard" replace />
   if (role === 'driver') return <Navigate to="/driver/active-rides" replace />
   return <Navigate to="/home" replace />
@@ -40,11 +40,7 @@ export default function App() {
         />
         <Route
           path="/home"
-          element={
-            <ProtectedRoute allowedRoles={['user']}>
-              <MapHomePage />
-            </ProtectedRoute>
-          }
+          element={<MapHomePage />}
         />
         <Route
           path="/map"
@@ -52,11 +48,7 @@ export default function App() {
         />
         <Route
           path="/entry"
-          element={
-            <ProtectedRoute allowedRoles={['user']}>
-              <MapHomePage />
-            </ProtectedRoute>
-          }
+          element={<MapHomePage />}
         />
         <Route path="/" element={<RoleRedirect />} />
         <Route path="*" element={<RoleRedirect />} />

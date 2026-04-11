@@ -1,3 +1,4 @@
+import { MdCheck } from 'react-icons/md'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { useRideStore } from '../../store/rideStore'
@@ -27,7 +28,7 @@ export function CompletedOverlay() {
         </div>
         <div className="space-y-5 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:p-8 sm:pb-8 sm:pt-0">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-aparu/15 text-2xl">
-            ✓
+            <MdCheck className="text-aparu" />
           </div>
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-graphite-900 sm:text-2xl">

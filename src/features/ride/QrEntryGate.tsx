@@ -44,7 +44,7 @@ export function QrEntryGate() {
         </p>
       </div>
       <Card className="w-full max-w-md space-y-4 p-5 sm:p-6">
-        <p className="text-sm text-graphite-600">Демо-ссылка (Павлодар, тестовый сценарий):</p>
+        <p className="text-sm text-graphite-600">Демо-ссылка (Оскемен, тестовый сценарий):</p>
         <code className="block max-h-32 overflow-auto break-all rounded-lg bg-graphite-100 px-3 py-2 text-left text-xs text-graphite-700 [-webkit-overflow-scrolling:touch]">
           {demo}
         </code>

@@ -62,7 +62,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        {/* 🔹 Шаг 1 — телефон */}
+        {/* Шаг 1 — телефон */}
         {step === 'phone' && (
           <div className="space-y-3">
             <label className="block space-y-1.5">
@@ -99,7 +99,7 @@ export function LoginPage() {
           </div>
         )}
 
-        {/* 🔹 Шаг 2 — код */}
+        {/* Шаг 2 — код */}
         {step === 'code' && (
           <div className="space-y-3 border-t border-graphite-100 pt-5">
             <label className="block space-y-1.5">

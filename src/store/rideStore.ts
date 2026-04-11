@@ -32,6 +32,7 @@ type RideState = {
   driverLabel: string | null
   tariff: Tariff
   paymentMethod: PaymentMethod
+  pendingOrder: boolean
 
   setQrContext: (pointId: string | null, pickup: LatLng) => void
   setPickupAddress: (address: string) => void
@@ -42,6 +43,7 @@ type RideState = {
   setMapPickDestination: (v: boolean) => void
   setTariff: (tariff: Tariff) => void
   setPaymentMethod: (method: PaymentMethod) => void
+  setPendingOrder: (v: boolean) => void
   applyRide: (ride: BackendRide) => void
   resetRideSession: () => void
 }
@@ -60,6 +62,7 @@ export const useRideStore = create<RideState>((set) => ({
   driverLabel: null,
   tariff: 'economy',
   paymentMethod: 'cash',
+  pendingOrder: false,
 
   setQrContext: (pointId, pickup) =>
     set({
@@ -101,6 +104,8 @@ export const useRideStore = create<RideState>((set) => ({
 
   setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
 
+  setPendingOrder: (pendingOrder) => set({ pendingOrder }),
+
   applyRide: (ride) =>
     set((state) => {
       const pickup = { lat: ride.point_a.lat, lng: ride.point_a.lng }
@@ -130,6 +135,7 @@ export const useRideStore = create<RideState>((set) => ({
       driverLabel: null,
       tariff: 'economy',
       paymentMethod: 'cash',
+      pendingOrder: false,
     }),
 }))
 
