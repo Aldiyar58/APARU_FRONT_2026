@@ -1,36 +1,32 @@
-import { Card } from '../../components/ui/Card'
+﻿import { Card } from '../../components/ui/Card'
 import { useRideStore } from '../../store/rideStore'
 import { cn } from '../../utils/cn'
 
 const copy: Record<string, { title: string; subtitle: string }> = {
   searching: {
-    title: 'Ищем водителя',
-    subtitle: 'Обычно 10–40 секунд',
+    title: 'Looking for a driver',
+    subtitle: 'Usually takes 10 to 40 seconds',
   },
   assigned: {
-    title: 'Водитель назначен',
-    subtitle: 'Едет к точке подачи',
+    title: 'Driver assigned',
+    subtitle: 'Heading to your pickup point',
   },
   arrived: {
-    title: 'Водитель на месте',
-    subtitle: 'Можете выходить',
+    title: 'Driver arrived',
+    subtitle: 'You can head out now',
   },
   in_progress: {
-    title: 'В пути',
-    subtitle: 'Приятной поездки',
+    title: 'On the way',
+    subtitle: 'Ride is in progress',
   },
 }
 
 export function RideStatusPanel() {
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
-  const mockDriverName = useRideStore((s) => s.mockDriverName)
+  const driverLabel = useRideStore((s) => s.driverLabel)
 
   const statusCopy = copy[rideLifecycle]
-  if (
-    rideLifecycle === 'idle' ||
-    rideLifecycle === 'completed' ||
-    !statusCopy
-  ) {
+  if (rideLifecycle === 'idle' || rideLifecycle === 'completed' || !statusCopy) {
     return null
   }
 
@@ -46,10 +42,7 @@ export function RideStatusPanel() {
         )}
       >
         <div className="pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 md:pb-0 md:pt-0">
-          <div
-            className="flex justify-center pb-2 pt-1 md:hidden"
-            aria-hidden
-          >
+          <div className="flex justify-center pb-2 pt-1 md:hidden" aria-hidden>
             <span className="h-1 w-11 rounded-full bg-graphite-200" />
           </div>
           <div className="flex items-start gap-3 px-4 pb-4 pt-0 md:gap-4 md:p-0">
@@ -59,16 +52,12 @@ export function RideStatusPanel() {
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-graphite-400 sm:text-xs">
-                Статус
-              </p>
-              <h3 className="text-base font-semibold text-graphite-900 sm:text-lg">
-                {title}
-              </h3>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-graphite-400 sm:text-xs">Status</p>
+              <h3 className="text-base font-semibold text-graphite-900 sm:text-lg">{title}</h3>
               <p className="text-sm text-graphite-500">{subtitle}</p>
               {rideLifecycle !== 'searching' && (
                 <p className="mt-2 truncate text-sm font-medium text-graphite-800">
-                  {mockDriverName}
+                  {driverLabel ?? 'APARU driver assigned'}
                 </p>
               )}
             </div>

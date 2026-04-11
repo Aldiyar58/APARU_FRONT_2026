@@ -1,15 +1,19 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import type { RouteResponse } from '../services/aparuApi'
+import type { BackendRide, BackendRideStatus } from '../services/backend/rideApi'
 
-export type RideLifecycle =
-  | 'idle'
-  | 'searching'
-  | 'assigned'
-  | 'arrived'
-  | 'in_progress'
-  | 'completed'
+export type RideLifecycle = 'idle' | BackendRideStatus
 
 export type LatLng = { lat: number; lng: number }
+
+function driverLabelFor(driverId: number | null): string | null {
+  if (driverId == null) return null
+  return `Driver #${driverId}`
+}
+
+function pointLabel(point: LatLng): string {
+  return `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`
+}
 
 type RideState = {
   qrPointId: string | null
@@ -18,43 +22,35 @@ type RideState = {
   destination: LatLng | null
   destinationLabel: string
   route: RouteResponse | null
-  routeFetchId: number
-  /** Открыта ли нижняя панель подтверждения */
   confirmOpen: boolean
-  /** Режим: следующий тап по карте задаёт точку B */
   mapPickDestination: boolean
-  rideId: string | null
+  rideId: number | null
   rideLifecycle: RideLifecycle
-  mockDriverName: string
+  driverLabel: string | null
 
   setQrContext: (pointId: string | null, pickup: LatLng) => void
   setPickupAddress: (address: string) => void
   setDestination: (ll: LatLng, label: string) => void
   clearDestinationAndRoute: () => void
   setRoute: (route: RouteResponse | null) => void
-  bumpRouteFetch: () => void
   setConfirmOpen: (open: boolean) => void
   setMapPickDestination: (v: boolean) => void
-  startMockRide: () => void
-  advanceRideLifecycle: (next: RideLifecycle) => void
+  applyRide: (ride: BackendRide) => void
   resetRideSession: () => void
 }
 
-const drivers = ['Асхат · Toyota Camry', 'Данияр · Kia K5', 'Ерлан · Hyundai Sonata']
-
-export const useRideStore = create<RideState>((set, get) => ({
+export const useRideStore = create<RideState>((set) => ({
   qrPointId: null,
   pickup: null,
   pickupAddress: '',
   destination: null,
   destinationLabel: '',
   route: null,
-  routeFetchId: 0,
   confirmOpen: false,
   mapPickDestination: false,
   rideId: null,
   rideLifecycle: 'idle',
-  mockDriverName: drivers[0],
+  driverLabel: null,
 
   setQrContext: (pointId, pickup) =>
     set({
@@ -68,15 +64,15 @@ export const useRideStore = create<RideState>((set, get) => ({
       mapPickDestination: false,
       rideId: null,
       rideLifecycle: 'idle',
-      mockDriverName: drivers[Math.floor(Math.random() * drivers.length)],
+      driverLabel: null,
     }),
 
   setPickupAddress: (pickupAddress) => set({ pickupAddress }),
 
-  setDestination: (ll, label) =>
+  setDestination: (destination, destinationLabel) =>
     set({
-      destination: ll,
-      destinationLabel: label,
+      destination,
+      destinationLabel,
       route: null,
       mapPickDestination: false,
     }),
@@ -86,20 +82,26 @@ export const useRideStore = create<RideState>((set, get) => ({
 
   setRoute: (route) => set({ route }),
 
-  bumpRouteFetch: () => set({ routeFetchId: get().routeFetchId + 1 }),
-
   setConfirmOpen: (confirmOpen) => set({ confirmOpen }),
 
   setMapPickDestination: (mapPickDestination) => set({ mapPickDestination }),
 
-  startMockRide: () =>
-    set({
-      rideId: crypto.randomUUID(),
-      rideLifecycle: 'searching',
-      confirmOpen: false,
-    }),
+  applyRide: (ride) =>
+    set((state) => {
+      const pickup = { lat: ride.point_a.lat, lng: ride.point_a.lng }
+      const destination = { lat: ride.point_b.lat, lng: ride.point_b.lng }
 
-  advanceRideLifecycle: (rideLifecycle) => set({ rideLifecycle }),
+      return {
+        pickup,
+        pickupAddress: state.pickupAddress || pointLabel(pickup),
+        destination,
+        destinationLabel: state.destinationLabel || pointLabel(destination),
+        rideId: ride.id,
+        rideLifecycle: ride.status,
+        driverLabel: driverLabelFor(ride.driver_id),
+        confirmOpen: false,
+      }
+    }),
 
   resetRideSession: () =>
     set({
@@ -110,6 +112,6 @@ export const useRideStore = create<RideState>((set, get) => ({
       mapPickDestination: false,
       rideId: null,
       rideLifecycle: 'idle',
-      mockDriverName: drivers[Math.floor(Math.random() * drivers.length)],
+      driverLabel: null,
     }),
 }))

@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { decodeJwtPayload, type JwtRole } from '../lib/jwt'
 
@@ -6,7 +6,6 @@ type AuthState = {
   accessToken: string | null
   role: JwtRole | null
   phone: string | null
-  /** Server-reported bonus balance when authenticated (synced from /entry, /me). */
   bonusBalance: number | null
   setSession: (token: string) => void
   setBonusBalance: (n: number | null) => void
@@ -33,6 +32,7 @@ export const useAuthStore = create<AuthState>()(
           accessToken: token,
           role,
           phone: typeof payload?.phone === 'string' ? payload.phone : null,
+          bonusBalance: null,
         })
       },
 

@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+﻿import { useQuery } from '@tanstack/react-query'
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 import { AppHeader } from '../components/layout/AppHeader'
 import { BonusScreen } from '../features/bonus/BonusScreen'
 import { MapPane } from '../features/map/MapPane'
@@ -12,10 +11,14 @@ import { RidePhaseTimers } from '../features/ride/RidePhaseTimers'
 import { RideStatusPanel } from '../features/ride/RideStatusPanel'
 import { RouteSync } from '../features/ride/RouteSync'
 import { useQrSearchParams } from '../hooks/useQrSearchParams'
+import { fetchBonusSummary } from '../services/backend/bonusApi'
 import { fetchQrEntry } from '../services/backend/entryApi'
+import { getRide } from '../services/backend/rideApi'
+import { fetchMe } from '../services/backend/userApi'
 import { useAuthStore } from '../store/authStore'
 import { useRideStore } from '../store/rideStore'
 import { useUiStore } from '../store/uiStore'
+import { useLocation } from 'react-router-dom'
 
 export function MapHomePage() {
   const { search } = useLocation()
@@ -23,6 +26,8 @@ export function MapHomePage() {
 
   const setQrContext = useRideStore((s) => s.setQrContext)
   const setPickupAddress = useRideStore((s) => s.setPickupAddress)
+  const applyRide = useRideStore((s) => s.applyRide)
+  const rideId = useRideStore((s) => s.rideId)
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
 
   const accessToken = useAuthStore((s) => s.accessToken)
@@ -32,7 +37,8 @@ export function MapHomePage() {
   const setBonusScreenOpen = useUiStore((s) => s.setBonusScreenOpen)
   const pushToast = useUiStore((s) => s.pushToast)
 
-  const lastHandled = useRef<string | null>(null)
+  const lastHandledEntry = useRef<string | null>(null)
+  const lastCompletedRide = useRef<number | null>(null)
 
   useLayoutEffect(() => {
     if (lat != null && lng != null) {
@@ -53,11 +59,24 @@ export function MapHomePage() {
     enabled: validEntry,
   })
 
+  const meQ = useQuery({
+    queryKey: ['me', accessToken],
+    queryFn: fetchMe,
+    enabled: Boolean(accessToken),
+  })
+
+  const rideQ = useQuery({
+    queryKey: ['ride', rideId, accessToken],
+    queryFn: () => getRide(rideId!),
+    enabled: Boolean(accessToken && rideId != null && rideLifecycle !== 'completed'),
+    refetchInterval: 3_000,
+  })
+
   useEffect(() => {
     if (!entryQ.isSuccess || !entryQ.data || !pointId) return
     const stamp = `${pointId}:${entryQ.dataUpdatedAt}`
-    if (lastHandled.current === stamp) return
-    lastHandled.current = stamp
+    if (lastHandledEntry.current === stamp) return
+    lastHandledEntry.current = stamp
 
     if (entryQ.data.address) {
       setPickupAddress(entryQ.data.address)
@@ -65,10 +84,10 @@ export function MapHomePage() {
 
     if (accessToken) {
       setBonusBalance(entryQ.data.bonus_balance)
-      pushToast(`Скан точки. Бонусы: ${entryQ.data.bonus_balance}`, 'success')
+      pushToast(`QR point scanned. Bonuses: ${entryQ.data.bonus_balance}`, 'success')
     } else {
       setBonusBalance(null)
-      pushToast('Скан точки. Бонусы на сервере: 0 — войдите, чтобы начислялось +10.', 'info')
+      pushToast('QR point scanned. Sign in to collect bonus points on the server.', 'info')
     }
   }, [
     entryQ.isSuccess,
@@ -81,7 +100,40 @@ export function MapHomePage() {
     pushToast,
   ])
 
-  if (!validEntry) {
+  useEffect(() => {
+    if (!meQ.data) return
+
+    setBonusBalance(meQ.data.profile.bonus_balance)
+
+    if (rideId == null || rideLifecycle === 'idle') {
+      const activeRide = meQ.data.rides.find((ride) => ride.status !== 'completed')
+      if (activeRide) {
+        applyRide(activeRide)
+      }
+    }
+  }, [meQ.data, setBonusBalance, rideId, rideLifecycle, applyRide])
+
+  useEffect(() => {
+    if (rideQ.data) {
+      applyRide(rideQ.data)
+    }
+  }, [rideQ.data, applyRide])
+
+  useEffect(() => {
+    if (!rideQ.data || rideQ.data.status !== 'completed') return
+    if (lastCompletedRide.current === rideQ.data.id) return
+    lastCompletedRide.current = rideQ.data.id
+
+    pushToast(`Ride #${rideQ.data.id} completed.`, 'success')
+
+    if (!accessToken) return
+
+    void fetchBonusSummary()
+      .then((summary) => setBonusBalance(summary.balance))
+      .catch(() => undefined)
+  }, [rideQ.data, accessToken, setBonusBalance, pushToast])
+
+  if (!validEntry && rideLifecycle === 'idle') {
     return <QrEntryGate />
   }
 

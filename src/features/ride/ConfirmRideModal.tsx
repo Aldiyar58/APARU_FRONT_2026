@@ -1,18 +1,26 @@
+﻿import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import { useBonusStore } from '../../store/bonusStore'
+import { createRide } from '../../services/backend/rideApi'
+import { useAuthStore } from '../../store/authStore'
 import { useRideStore } from '../../store/rideStore'
+import { useUiStore } from '../../store/uiStore'
 import { formatDistanceMeters, formatDurationMs } from '../../utils/format'
 import { cn } from '../../utils/cn'
 
 export function ConfirmRideModal() {
   const open = useRideStore((s) => s.confirmOpen)
   const setConfirmOpen = useRideStore((s) => s.setConfirmOpen)
+  const pickup = useRideStore((s) => s.pickup)
   const pickupAddress = useRideStore((s) => s.pickupAddress)
+  const destination = useRideStore((s) => s.destination)
   const destinationLabel = useRideStore((s) => s.destinationLabel)
   const route = useRideStore((s) => s.route)
-  const startMockRide = useRideStore((s) => s.startMockRide)
-  const awardOrderBonus = useBonusStore((s) => s.awardOrderBonus)
+  const applyRide = useRideStore((s) => s.applyRide)
+  const setRoute = useRideStore((s) => s.setRoute)
+  const accessToken = useAuthStore((s) => s.accessToken)
+  const pushToast = useUiStore((s) => s.pushToast)
+  const [submitting, setSubmitting] = useState(false)
 
   if (!open) return null
 
@@ -30,40 +38,27 @@ export function ConfirmRideModal() {
         )}
       >
         <div className="flex max-h-[min(92dvh,640px)] flex-col sm:max-h-none">
-          <div
-            className="flex shrink-0 justify-center pt-2.5 pb-1 sm:hidden"
-            aria-hidden
-          >
+          <div className="flex shrink-0 justify-center pb-1 pt-2.5 sm:hidden" aria-hidden>
             <span className="h-1 w-11 rounded-full bg-graphite-200" />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-2 pt-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible sm:p-0 sm:pt-0">
-            <h2
-              id="confirm-title"
-              className="text-lg font-semibold tracking-tight text-graphite-900 sm:text-xl"
-            >
-              Подтвердить поездку
+            <h2 id="confirm-title" className="text-lg font-semibold tracking-tight text-graphite-900 sm:text-xl">
+              Confirm ride
             </h2>
             <p className="mt-2 text-sm text-graphite-500">
-              Оплата и назначение водителя — демо. Реальный заказ доступен в приложении
-              APARU.
+              This creates a real backend ride and keeps the rider screen synced with live ride status.
             </p>
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">A</span>
-                <span className="min-w-0 break-words text-graphite-800">
-                  {pickupAddress || 'Точка подачи'}
-                </span>
+                <span className="min-w-0 break-words text-graphite-800">{pickupAddress || 'Pickup point'}</span>
               </li>
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">B</span>
-                <span className="min-w-0 break-words text-graphite-800">
-                  {destinationLabel}
-                </span>
+                <span className="min-w-0 break-words text-graphite-800">{destinationLabel || 'Destination'}</span>
               </li>
               <li className="flex flex-wrap gap-2 pt-1 text-graphite-600">
-                <span className="font-semibold text-graphite-900">
-                  {formatDistanceMeters(route?.Distance)}
-                </span>
+                <span className="font-semibold text-graphite-900">{formatDistanceMeters(route?.Distance)}</span>
                 <span className="text-graphite-300">·</span>
                 <span>{formatDurationMs(route?.Time)}</span>
               </li>
@@ -73,19 +68,46 @@ export function ConfirmRideModal() {
             <div className="flex flex-col gap-2 sm:flex-row-reverse">
               <Button
                 className="min-h-12 w-full sm:min-h-0 sm:flex-1"
-                onClick={() => {
-                  awardOrderBonus()
-                  startMockRide()
+                disabled={submitting}
+                onClick={async () => {
+                  if (!accessToken) {
+                    pushToast('Sign in before creating a ride.', 'info')
+                    return
+                  }
+                  if (!pickup || !destination) {
+                    pushToast('Pick both ride points first.', 'error')
+                    return
+                  }
+
+                  setSubmitting(true)
+                  try {
+                    const response = await createRide({
+                      pointA: pickup,
+                      pointB: destination,
+                      tariff: 'economy',
+                      paymentMethod: 'cash',
+                    })
+                    if (response.route) {
+                      setRoute(response.route)
+                    }
+                    applyRide(response.ride)
+                    pushToast(`Ride #${response.ride.id} created.`, 'success')
+                  } catch (error) {
+                    pushToast((error as Error).message, 'error')
+                  } finally {
+                    setSubmitting(false)
+                  }
                 }}
               >
-                Подтвердить
+                {submitting ? 'Creating...' : 'Confirm'}
               </Button>
               <Button
                 variant="ghost"
                 className="min-h-12 w-full sm:min-h-0 sm:flex-1"
+                disabled={submitting}
                 onClick={() => setConfirmOpen(false)}
               >
-                Назад
+                Back
               </Button>
             </div>
           </div>

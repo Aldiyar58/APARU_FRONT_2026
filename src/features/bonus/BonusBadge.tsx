@@ -1,5 +1,4 @@
-import { useAuthStore } from '../../store/authStore'
-import { useBonusStore } from '../../store/bonusStore'
+﻿import { useAuthStore } from '../../store/authStore'
 import { cn } from '../../utils/cn'
 
 export function BonusBadge({
@@ -10,9 +9,7 @@ export function BonusBadge({
   className?: string
 }) {
   const token = useAuthStore((s) => s.accessToken)
-  const serverBal = useAuthStore((s) => s.bonusBalance)
-  const localBal = useBonusStore((s) => s.balance)
-  const balance = token && serverBal != null ? serverBal : localBal
+  const balance = useAuthStore((s) => (token ? s.bonusBalance ?? 0 : 0))
 
   return (
     <button
@@ -27,7 +24,7 @@ export function BonusBadge({
         className="inline-flex h-2 w-2 shrink-0 rounded-full bg-aparu"
         aria-hidden
       />
-      <span className="tabular-nums">{balance} ₸</span>
+      <span className="tabular-nums">{balance} pts</span>
     </button>
   )
 }
