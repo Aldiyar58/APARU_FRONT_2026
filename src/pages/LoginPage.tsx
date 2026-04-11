@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -18,77 +18,142 @@ export function LoginPage() {
   const setSession = useAuthStore((s) => s.setSession)
   const pushToast = useUiStore((s) => s.pushToast)
 
+  const [step, setStep] = useState<'phone' | 'code'>('phone')
+
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [ttl, setTtl] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
 
   const canSend = useMemo(() => phone.trim().length >= 5, [phone])
-  const canVerify = useMemo(() => phone.trim().length >= 5 && code.trim().length >= 4, [phone, code])
+  const canVerify = useMemo(
+    () => phone.trim().length >= 5 && code.trim().length >= 4,
+    [phone, code]
+  )
+
+  useEffect(() => {
+    if (ttl == null) return
+
+    if (ttl <= 0) {
+      setTtl(null)
+      return
+    }
+
+    const id = setInterval(() => {
+      setTtl((t) => (t != null ? t - 1 : t))
+    }, 1000)
+
+    return () => clearInterval(id)
+  }, [ttl])
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-graphite-50 px-4 py-10">
       <Card className="w-full max-w-md space-y-5 p-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">APARU</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-graphite-900">Вход по SMS</h1>
+          <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">
+            APARU
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-graphite-900">
+            Вход по SMS
+          </h1>
           <p className="mt-2 text-sm text-graphite-500">
-            Мы отправим одноразовый код. После входа вы будете перенаправлены в нужный раздел по роли.
+            Мы отправим одноразовый код. После входа вы будете
+            перенаправлены в нужный раздел по роли.
           </p>
         </div>
 
-        <div className="space-y-3">
-          <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-graphite-600">Телефон</span>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+7…" />
-          </label>
-          <Button
-            type="button"
-            className="w-full"
-            disabled={!canSend || busy}
-            onClick={async () => {
-              setBusy(true)
-              try {
-                const r = await sendOtpCode(phone.trim())
-                setTtl(r.ttl_seconds)
-                pushToast(`Код отправлен. TTL: ${r.ttl_seconds} c`, 'success')
-              } catch (e) {
-                pushToast((e as Error).message, 'error')
-              } finally {
-                setBusy(false)
-              }
-            }}
-          >
-            Получить код
-          </Button>
-          {ttl != null && <p className="text-xs text-graphite-500">Код действует {ttl} секунд.</p>}
-        </div>
+        {/* 🔹 Шаг 1 — телефон */}
+        {step === 'phone' && (
+          <div className="space-y-3">
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-graphite-600">
+                Телефон
+              </span>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+7…"
+              />
+            </label>
 
-        <div className="space-y-3 border-t border-graphite-100 pt-5">
-          <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-graphite-600">Код из SMS</span>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" placeholder="0000" />
-          </label>
-          <Button
-            type="button"
-            className="w-full"
-            disabled={!canVerify || busy}
-            onClick={async () => {
-              setBusy(true)
-              try {
-                const r = await verifyOtp(phone.trim(), code.trim())
-                setSession(r.access_token)
-                navigate(postLoginPath(useAuthStore.getState().role ?? 'user'), { replace: true })
-              } catch (e) {
-                pushToast((e as Error).message, 'error')
-              } finally {
-                setBusy(false)
-              }
-            }}
-          >
-            Войти
-          </Button>
-        </div>
+            <Button
+              type="button"
+              className="w-full"
+              disabled={!canSend || busy}
+              onClick={async () => {
+                setBusy(true)
+                try {
+                  const r = await sendOtpCode(phone.trim())
+                  setTtl(r.ttl_seconds)
+                  setStep('code')
+                  pushToast('Код отправлен', 'success')
+                } catch (e) {
+                  pushToast((e as Error).message, 'error')
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              Получить код
+            </Button>
+          </div>
+        )}
+
+        {/* 🔹 Шаг 2 — код */}
+        {step === 'code' && (
+          <div className="space-y-3 border-t border-graphite-100 pt-5">
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-graphite-600">
+                Код из SMS
+              </span>
+              <Input
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                inputMode="numeric"
+                placeholder="0000"
+              />
+            </label>
+
+            <Button
+              type="button"
+              className="w-full"
+              disabled={!canVerify || busy}
+              onClick={async () => {
+                setBusy(true)
+                try {
+                  const r = await verifyOtp(phone.trim(), code.trim())
+                  setSession(r.access_token)
+                  navigate(
+                    postLoginPath(
+                      useAuthStore.getState().role ?? 'user'
+                    ),
+                    { replace: true }
+                  )
+                } catch (e) {
+                  pushToast((e as Error).message, 'error')
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              Войти
+            </Button>
+
+            <button
+              type="button"
+              className="text-sm text-graphite-500 hover:underline"
+              onClick={() => setStep('phone')}
+            >
+              Изменить номер
+            </button>
+
+            {ttl != null && ttl > 0 && (
+              <p className="text-xs text-graphite-500">
+                Код действует {ttl} сек.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-between text-sm">
           <Link className="text-aparu-dark hover:underline" to="/">

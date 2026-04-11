@@ -1,4 +1,4 @@
-﻿import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
@@ -8,9 +8,12 @@ import { AdminQrMapPicker } from '../features/map/AdminQrMapPicker'
 import {
   fetchQrPoints,
   generateQrPoint,
+  createDriver,
   type QrGenerateResponse,
+  type AdminCreateDriverResponse,
 } from '../services/backend/adminApi'
 import { queryClient } from '../services/queryClient'
+import { useAuthStore } from '../store/authStore'
 import { useUiStore } from '../store/uiStore'
 
 function parseCoordinate(value: string) {
@@ -39,6 +42,8 @@ function buildQrFilename(generated: QrGenerateResponse) {
 
 export function AdminDashboardPage() {
   const pushToast = useUiStore((s) => s.pushToast)
+
+  // ── QR section state ──
   const [name, setName] = useState('')
   const [lat, setLat] = useState('')
   const [lng, setLng] = useState('')
@@ -48,6 +53,13 @@ export function AdminDashboardPage() {
   const selectedPoint = latValue != null && lngValue != null
     ? { lat: latValue, lng: lngValue }
     : null
+
+  // ── Driver section state ──
+  const [driverPhone, setDriverPhone] = useState('')
+  const [driverName, setDriverName] = useState('')
+  const [vehicleModel, setVehicleModel] = useState('')
+  const [licensePlate, setLicensePlate] = useState('')
+  const [createdDriver, setCreatedDriver] = useState<AdminCreateDriverResponse | null>(null)
 
   const pointsQ = useQuery({
     queryKey: ['admin-qr-points'],
@@ -61,6 +73,21 @@ export function AdminDashboardPage() {
       setName('')
       pushToast(`QR point #${data.qr_point.id} generated.`, 'success')
       await queryClient.invalidateQueries({ queryKey: ['admin-qr-points'] })
+    },
+    onError: (error) => {
+      pushToast((error as Error).message, 'error')
+    },
+  })
+
+  const driverMutation = useMutation({
+    mutationFn: createDriver,
+    onSuccess: (data) => {
+      setCreatedDriver(data)
+      setDriverPhone('')
+      setDriverName('')
+      setVehicleModel('')
+      setLicensePlate('')
+      pushToast(`Водитель ${data.profile.name ?? data.profile.phone} создан.`, 'success')
     },
     onError: (error) => {
       pushToast((error as Error).message, 'error')
@@ -90,11 +117,103 @@ export function AdminDashboardPage() {
         <p className="mt-2 text-sm text-graphite-600">
           QR point generation and listing now use the real admin backend endpoints.
         </p>
-        <Link className="mt-4 inline-block text-sm font-semibold text-aparu-dark hover:underline" to="/">
-          Back to map
-        </Link>
+        <div className="mt-4 flex items-center gap-4">
+          <Link className="text-sm font-semibold text-aparu-dark hover:underline" to="/">
+            Back to map
+          </Link>
+          <button
+            type="button"
+            className="text-sm font-semibold text-graphite-500 hover:text-graphite-800 hover:underline"
+            onClick={() => {
+              useAuthStore.getState().clearSession()
+              pushToast('Вы вышли из системы', 'info')
+            }}
+          >
+            Выйти
+          </button>
+        </div>
       </Card>
 
+      {/* ── Добавить водителя ── */}
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="text-lg font-semibold text-graphite-900">Добавить водителя</h2>
+          <p className="mt-1 text-sm text-graphite-500">
+            Создать нового пользователя с ролью водителя. Марка авто и гос. номер опциональны — либо оба, либо ни одного.
+          </p>
+        </div>
+
+        <form
+          className="grid content-start gap-3 sm:max-w-md"
+          onSubmit={(event) => {
+            event.preventDefault()
+
+            if (!driverPhone.trim() || !driverName.trim()) {
+              pushToast('Укажите телефон и имя водителя.', 'error')
+              return
+            }
+
+            const hasVehicle = vehicleModel.trim() && licensePlate.trim()
+            const partialVehicle =
+              (vehicleModel.trim() && !licensePlate.trim()) ||
+              (!vehicleModel.trim() && licensePlate.trim())
+
+            if (partialVehicle) {
+              pushToast('Укажите и модель авто, и гос. номер — или оставьте оба поля пустыми.', 'error')
+              return
+            }
+
+            driverMutation.mutate({
+              phone: driverPhone.trim(),
+              name: driverName.trim(),
+              vehicle_model: hasVehicle ? vehicleModel.trim() : undefined,
+              license_plate: hasVehicle ? licensePlate.trim() : undefined,
+            })
+          }}
+        >
+          <Input
+            value={driverPhone}
+            onChange={(e) => setDriverPhone(e.target.value)}
+            placeholder="Телефон (+7...)"
+          />
+          <Input
+            value={driverName}
+            onChange={(e) => setDriverName(e.target.value)}
+            placeholder="Имя водителя"
+          />
+          <Input
+            value={vehicleModel}
+            onChange={(e) => setVehicleModel(e.target.value)}
+            placeholder="Модель авто (опционально)"
+          />
+          <Input
+            value={licensePlate}
+            onChange={(e) => setLicensePlate(e.target.value)}
+            placeholder="Гос. номер (опционально)"
+          />
+          <div>
+            <Button type="submit" disabled={driverMutation.isPending}>
+              {driverMutation.isPending ? 'Создание...' : 'Создать водителя'}
+            </Button>
+          </div>
+        </form>
+
+        {createdDriver && (
+          <div className="rounded-xl border border-graphite-100 bg-graphite-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">Создан</p>
+            <p className="mt-1 font-medium text-graphite-900">
+              {createdDriver.profile.name} — {createdDriver.profile.phone}
+            </p>
+            {createdDriver.vehicle.vehicle_model && (
+              <p className="mt-1 text-sm text-graphite-600">
+                {createdDriver.vehicle.vehicle_model}, {createdDriver.vehicle.license_plate}
+              </p>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* ── Generate QR point ── */}
       <Card className="space-y-4 p-6">
         <div>
           <h2 className="text-lg font-semibold text-graphite-900">Generate QR point</h2>

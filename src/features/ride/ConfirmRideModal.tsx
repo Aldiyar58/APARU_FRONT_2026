@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { createRide } from '../../services/backend/rideApi'
@@ -7,6 +7,17 @@ import { useRideStore } from '../../store/rideStore'
 import { useUiStore } from '../../store/uiStore'
 import { formatDistanceMeters, formatDurationMs } from '../../utils/format'
 import { cn } from '../../utils/cn'
+
+const TARIFF_LABELS: Record<string, string> = {
+  economy: 'Эконом',
+  comfort: 'Комфорт',
+}
+
+const PAYMENT_LABELS: Record<string, string> = {
+  cash: 'Наличные',
+  kaspi: 'Kaspi',
+  halyq: 'Halyk',
+}
 
 export function ConfirmRideModal() {
   const open = useRideStore((s) => s.confirmOpen)
@@ -18,6 +29,8 @@ export function ConfirmRideModal() {
   const route = useRideStore((s) => s.route)
   const applyRide = useRideStore((s) => s.applyRide)
   const setRoute = useRideStore((s) => s.setRoute)
+  const tariff = useRideStore((s) => s.tariff)
+  const paymentMethod = useRideStore((s) => s.paymentMethod)
   const accessToken = useAuthStore((s) => s.accessToken)
   const pushToast = useUiStore((s) => s.pushToast)
   const [submitting, setSubmitting] = useState(false)
@@ -43,19 +56,27 @@ export function ConfirmRideModal() {
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-2 pt-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible sm:p-0 sm:pt-0">
             <h2 id="confirm-title" className="text-lg font-semibold tracking-tight text-graphite-900 sm:text-xl">
-              Confirm ride
+              Подтверждение поездки
             </h2>
             <p className="mt-2 text-sm text-graphite-500">
-              This creates a real backend ride and keeps the rider screen synced with live ride status.
+              Проверьте данные и нажмите «Подтвердить» для создания заказа.
             </p>
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">A</span>
-                <span className="min-w-0 break-words text-graphite-800">{pickupAddress || 'Pickup point'}</span>
+                <span className="min-w-0 break-words text-graphite-800">{pickupAddress || 'Точка подачи'}</span>
               </li>
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">B</span>
-                <span className="min-w-0 break-words text-graphite-800">{destinationLabel || 'Destination'}</span>
+                <span className="min-w-0 break-words text-graphite-800">{destinationLabel || 'Место назначения'}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 font-medium text-graphite-400">🚕</span>
+                <span className="text-graphite-800">{TARIFF_LABELS[tariff] ?? tariff}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 font-medium text-graphite-400">💳</span>
+                <span className="text-graphite-800">{PAYMENT_LABELS[paymentMethod] ?? paymentMethod}</span>
               </li>
               <li className="flex flex-wrap gap-2 pt-1 text-graphite-600">
                 <span className="font-semibold text-graphite-900">{formatDistanceMeters(route?.Distance)}</span>
@@ -71,11 +92,11 @@ export function ConfirmRideModal() {
                 disabled={submitting}
                 onClick={async () => {
                   if (!accessToken) {
-                    pushToast('Sign in before creating a ride.', 'info')
+                    pushToast('Войдите перед созданием поездки.', 'info')
                     return
                   }
                   if (!pickup || !destination) {
-                    pushToast('Pick both ride points first.', 'error')
+                    pushToast('Укажите обе точки маршрута.', 'error')
                     return
                   }
 
@@ -84,14 +105,14 @@ export function ConfirmRideModal() {
                     const response = await createRide({
                       pointA: pickup,
                       pointB: destination,
-                      tariff: 'economy',
-                      paymentMethod: 'cash',
+                      tariff,
+                      paymentMethod,
                     })
                     if (response.route) {
                       setRoute(response.route)
                     }
                     applyRide(response.ride)
-                    pushToast(`Ride #${response.ride.id} created.`, 'success')
+                    pushToast(`Поездка #${response.ride.id} создана.`, 'success')
                   } catch (error) {
                     pushToast((error as Error).message, 'error')
                   } finally {
@@ -99,7 +120,7 @@ export function ConfirmRideModal() {
                   }
                 }}
               >
-                {submitting ? 'Creating...' : 'Confirm'}
+                {submitting ? 'Создание...' : 'Подтвердить'}
               </Button>
               <Button
                 variant="ghost"
@@ -107,7 +128,7 @@ export function ConfirmRideModal() {
                 disabled={submitting}
                 onClick={() => setConfirmOpen(false)}
               >
-                Back
+                Назад
               </Button>
             </div>
           </div>

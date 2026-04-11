@@ -1,10 +1,13 @@
-﻿import { create } from 'zustand'
+import { create } from 'zustand'
 import type { RouteResponse } from '../services/aparuApi'
 import type { BackendRide, BackendRideStatus } from '../services/backend/rideApi'
 
 export type RideLifecycle = 'idle' | BackendRideStatus
 
 export type LatLng = { lat: number; lng: number }
+
+export type Tariff = 'economy' | 'comfort'
+export type PaymentMethod = 'cash' | 'kaspi' | 'halyq'
 
 function driverLabelFor(driverId: number | null): string | null {
   if (driverId == null) return null
@@ -27,6 +30,8 @@ type RideState = {
   rideId: number | null
   rideLifecycle: RideLifecycle
   driverLabel: string | null
+  tariff: Tariff
+  paymentMethod: PaymentMethod
 
   setQrContext: (pointId: string | null, pickup: LatLng) => void
   setPickupAddress: (address: string) => void
@@ -35,6 +40,8 @@ type RideState = {
   setRoute: (route: RouteResponse | null) => void
   setConfirmOpen: (open: boolean) => void
   setMapPickDestination: (v: boolean) => void
+  setTariff: (tariff: Tariff) => void
+  setPaymentMethod: (method: PaymentMethod) => void
   applyRide: (ride: BackendRide) => void
   resetRideSession: () => void
 }
@@ -51,6 +58,8 @@ export const useRideStore = create<RideState>((set) => ({
   rideId: null,
   rideLifecycle: 'idle',
   driverLabel: null,
+  tariff: 'economy',
+  paymentMethod: 'cash',
 
   setQrContext: (pointId, pickup) =>
     set({
@@ -65,6 +74,8 @@ export const useRideStore = create<RideState>((set) => ({
       rideId: null,
       rideLifecycle: 'idle',
       driverLabel: null,
+      tariff: 'economy',
+      paymentMethod: 'cash',
     }),
 
   setPickupAddress: (pickupAddress) => set({ pickupAddress }),
@@ -85,6 +96,10 @@ export const useRideStore = create<RideState>((set) => ({
   setConfirmOpen: (confirmOpen) => set({ confirmOpen }),
 
   setMapPickDestination: (mapPickDestination) => set({ mapPickDestination }),
+
+  setTariff: (tariff) => set({ tariff }),
+
+  setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
 
   applyRide: (ride) =>
     set((state) => {
@@ -113,5 +128,8 @@ export const useRideStore = create<RideState>((set) => ({
       rideId: null,
       rideLifecycle: 'idle',
       driverLabel: null,
+      tariff: 'economy',
+      paymentMethod: 'cash',
     }),
 }))
+

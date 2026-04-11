@@ -5,6 +5,7 @@ export type MeResponse = {
   profile: {
     id: number
     phone: string
+    name: string | null
     bonus_balance: number
     role: 'user' | 'driver' | 'admin'
     created_at: string

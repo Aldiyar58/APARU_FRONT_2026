@@ -2,11 +2,23 @@ import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { useRideStore } from '../../store/rideStore'
+import type { Tariff, PaymentMethod } from '../../store/rideStore'
 import { formatAddressFromReverse, formatDistanceMeters, formatDurationMs } from '../../utils/format'
 import type { ReverseGeocodeResponse } from '../../services/aparuApi'
 import { DestinationSearch } from './DestinationSearch'
 import { useTripRoute } from './useTripRoute'
 import { cn } from '../../utils/cn'
+
+const TARIFFS: { value: Tariff; label: string; desc: string }[] = [
+  { value: 'economy', label: 'Эконом', desc: 'Доступная цена' },
+  { value: 'comfort', label: 'Комфорт', desc: 'Более высокий класс' },
+]
+
+const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+  { value: 'cash', label: 'Наличные' },
+  { value: 'kaspi', label: 'Kaspi' },
+  { value: 'halyq', label: 'Halyk' },
+]
 
 export function HomeBottomSheet({
   reverseLoading,
@@ -27,6 +39,10 @@ export function HomeBottomSheet({
   const setConfirmOpen = useRideStore((s) => s.setConfirmOpen)
   const clearDestinationAndRoute = useRideStore((s) => s.clearDestinationAndRoute)
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
+  const tariff = useRideStore((s) => s.tariff)
+  const setTariff = useRideStore((s) => s.setTariff)
+  const paymentMethod = useRideStore((s) => s.paymentMethod)
+  const setPaymentMethod = useRideStore((s) => s.setPaymentMethod)
 
   const routeQ = useTripRoute()
   const displayAddress =
@@ -79,6 +95,62 @@ export function HomeBottomSheet({
             </div>
 
             <DestinationSearch />
+
+            {/* Тариф */}
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-graphite-400">
+                Тариф
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {TARIFFS.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setTariff(t.value)}
+                    className={cn(
+                      'flex flex-col items-start rounded-xl border px-3 py-2.5 text-left transition-all duration-200',
+                      tariff === t.value
+                        ? 'border-aparu bg-aparu/8 ring-1 ring-aparu/30'
+                        : 'border-graphite-200 bg-white active:bg-graphite-50 sm:hover:border-graphite-300',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'text-sm font-semibold',
+                        tariff === t.value ? 'text-aparu-dark' : 'text-graphite-900',
+                      )}
+                    >
+                      {t.label}
+                    </span>
+                    <span className="text-xs text-graphite-500">{t.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Способ оплаты */}
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-graphite-400">
+                Оплата
+              </p>
+              <div className="flex gap-2">
+                {PAYMENT_METHODS.map((pm) => (
+                  <button
+                    key={pm.value}
+                    type="button"
+                    onClick={() => setPaymentMethod(pm.value)}
+                    className={cn(
+                      'flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200',
+                      paymentMethod === pm.value
+                        ? 'border-aparu bg-aparu/8 text-aparu-dark ring-1 ring-aparu/30'
+                        : 'border-graphite-200 bg-white text-graphite-700 active:bg-graphite-50 sm:hover:border-graphite-300',
+                    )}
+                  >
+                    {pm.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {destination && (
               <div className="flex flex-wrap items-center gap-3 rounded-xl bg-graphite-50 px-3 py-3 text-sm sm:px-4">
