@@ -22,7 +22,12 @@ const copy: Record<string, { title: string; subtitle: string }> = {
   },
 }
 
-export function RideStatusPanel() {
+interface RideStatusPanelProps {
+  onCancel?: () => void
+  isCanceling?: boolean
+}
+
+export function RideStatusPanel({ onCancel, isCanceling }: RideStatusPanelProps) {
   const { t } = useTranslation()
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
   const driverLabel = useRideStore((s) => s.driverLabel)
@@ -67,6 +72,18 @@ export function RideStatusPanel() {
               </span>
             )}
           </div>
+          {onCancel && rideLifecycle !== 'in_progress' && (
+            <div className="px-4 pb-4 pt-0 text-center md:pb-5">
+              <button
+                type="button"
+                className="text-sm font-medium text-red-500 transition-colors hover:text-red-700 disabled:opacity-50 active:text-red-800"
+                onClick={onCancel}
+                disabled={isCanceling}
+              >
+                {isCanceling ? t('status.canceling', 'Canceling...') : t('status.cancelRide', 'Cancel Ride')}
+              </button>
+            </div>
+          )}
         </div>
       </Card>
     </div>

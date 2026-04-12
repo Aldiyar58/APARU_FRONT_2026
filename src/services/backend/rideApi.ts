@@ -59,3 +59,11 @@ export async function getRide(rideId: number): Promise<BackendRide> {
   const { data } = await apiClient.get<BackendRide>(`/ride/${rideId}`)
   return data
 }
+
+
+export async function cancelRide(rideId: number): Promise<BackendRide> {
+  const { data } = await apiClient.post<BackendRide>(
+    `/ride/${rideId}/cancel`
+  )
+  return data
+}

@@ -9,18 +9,19 @@ import type { ReverseGeocodeResponse } from '../../services/aparuApi'
 import { DestinationSearch } from './DestinationSearch'
 import { useTripRoute } from './useTripRoute'
 import { cn } from '../../utils/cn'
+import { BsCash } from 'react-icons/bs'
 
 const TARIFFS: { value: Tariff; label: string; desc: string }[] = [
-  { value: 'economy', label: 'Эконом', desc: '150 ₸/км' },
-  { value: 'optimal', label: 'Оптимал', desc: '200 ₸/км' },
-  { value: 'comfort', label: 'Комфорт', desc: '250 ₸/км' },
-  { value: 'business', label: 'Бизнес', desc: '350 ₸/км' },
+  { value: 'economy', label: 'Эконом', desc: '350 ₸/км' },
+  { value: 'optimal', label: 'Оптимал', desc: '550 ₸/км' },
+  { value: 'comfort', label: 'Комфорт', desc: '600 ₸/км' },
+  { value: 'business', label: 'Бизнес', desc: '700 ₸/км' },
 ]
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'cash', label: 'Наличные' },
-  { value: 'kaspi', label: 'Kaspi' },
-  { value: 'halyq', label: 'Halyk' },
+const PAYMENT_METHODS: { value: PaymentMethod; label: string, icon: string }[] = [
+  { value: 'cash', label: 'Наличные', icon: 'cash' },
+  { value: 'kaspi', label: 'Kaspi', icon: 'payment/kaspi.webp' },
+  { value: 'halyq', label: 'Halyk', icon: 'payment/halyq.jpg' },
 ]
 
 export function HomeBottomSheet({
@@ -144,13 +145,20 @@ export function HomeBottomSheet({
                     type="button"
                     onClick={() => setPaymentMethod(pm.value)}
                     className={cn(
-                      'flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200',
+                      'flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 text-sm font-semibold transition-all duration-200',
                       paymentMethod === pm.value
                         ? 'border-aparu bg-aparu/8 text-aparu-dark ring-1 ring-aparu/30'
                         : 'border-graphite-200 bg-white text-graphite-700 active:bg-graphite-50 sm:hover:border-graphite-300',
                     )}
                   >
-                    {t(`confirm.payment.${pm.value}`, pm.label)}
+                    <div className="flex h-5 items-center justify-center">
+                      {pm.value === 'cash' ? (
+                        <BsCash className={cn('h-5 w-auto', paymentMethod === pm.value ? 'text-aparu-dark' : 'text-graphite-500')} />
+                      ) : (
+                        <img src={`/${pm.icon}`} alt={pm.label} className="h-full w-auto object-contain mix-blend-multiply rounded-[2px]" />
+                      )}
+                    </div>
+                    <span>{t(`confirm.payment.${pm.value}`, pm.label)}</span>
                   </button>
                 ))}
               </div>

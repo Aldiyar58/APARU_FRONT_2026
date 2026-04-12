@@ -20,10 +20,10 @@ const TARIFF_LABELS: Record<string, string> = {
 }
 
 const TARIFF_COEFS: Record<string, number> = {
-  economy: 150,
-  optimal: 200,
-  comfort: 250,
-  business: 350,
+  economy: 350,
+  optimal: 550,
+  comfort: 600,
+  business: 700,
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -291,11 +291,11 @@ export function ConfirmRideModal() {
                       const apiCall = qrPointId
                         ? createRideFromQr({ qrPointId, pointB: destination, tariff, paymentMethod })
                         : createRide({
-                            pointA: pickup,
-                            pointB: destination,
-                            tariff,
-                            paymentMethod,
-                          })
+                          pointA: pickup,
+                          pointB: destination,
+                          tariff,
+                          paymentMethod,
+                        })
                       const response = await apiCall
                       if (response.route) {
                         setRoute(response.route)

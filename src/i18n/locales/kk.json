@@ -73,7 +73,9 @@
     "pointOnMap": "Картадағы нүкте",
     "toastQrRetrieved": "QR-нүкте алынды.",
     "toastQrRetrievedSignin": "QR-нүкте алынды. Тапсырыс беру үшін жүйеге кіріңіз.",
-    "toastRideCompleted": "Сапар #{{id}} аяқталды."
+    "toastRideCompleted": "Сапар #{{id}} аяқталды.",
+    "toastRideCancelled": "Сапар тоқтатылды.",
+    "toastCancelFailed": "Сапарды тоқтату сәтсіз аяқталды."
   },
   "completed": {
     "title": "Сапар аяқталды",
@@ -156,6 +158,8 @@
   "status": {
     "statusLabel": "Күйі",
     "defaultDriver": "APARU жүргізушісі тағайындалды",
+    "cancelRide": "Сапардан бас тарту",
+    "canceling": "Бас тарту...",
     "searching": {
       "title": "Жүргізушіні іздеу",
       "subtitle": "Әдетте 10-40 секунд алады"

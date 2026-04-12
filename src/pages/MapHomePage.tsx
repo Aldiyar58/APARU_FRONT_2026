@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { BonusScreen } from '../features/bonus/BonusScreen'
@@ -13,7 +13,7 @@ import { RouteSync } from '../features/ride/RouteSync'
 import { useQrSearchParams } from '../hooks/useQrSearchParams'
 import { fetchBonusSummary } from '../services/backend/bonusApi'
 import { fetchQrPoint } from '../services/backend/entryApi'
-import { getRide } from '../services/backend/rideApi'
+import { cancelRide, getRide } from '../services/backend/rideApi'
 import { fetchMe } from '../services/backend/userApi'
 import { useAuthStore } from '../store/authStore'
 import { useRideStore } from '../store/rideStore'
@@ -29,6 +29,7 @@ export function MapHomePage() {
   const setQrContext = useRideStore((s) => s.setQrContext)
   const setPickupAddress = useRideStore((s) => s.setPickupAddress)
   const applyRide = useRideStore((s) => s.applyRide)
+  const resetRideSession = useRideStore((s) => s.resetRideSession)
   const rideId = useRideStore((s) => s.rideId)
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
 
@@ -43,6 +44,17 @@ export function MapHomePage() {
   const lastCompletedRide = useRef<number | null>(null)
 
   const validEntry = (pointId?.trim().length ?? 0) > 0
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => cancelRide(id),
+    onSuccess: () => {
+      pushToast(t('map.toastRideCancelled', 'Ride cancelled.'), 'info')
+      resetRideSession()
+    },
+    onError: () => {
+      pushToast(t('map.toastCancelFailed', 'Failed to cancel ride.'), 'error')
+    },
+  })
 
   const entryQ = useQuery({
     queryKey: ['qr-point', pointId],
@@ -143,7 +155,12 @@ export function MapHomePage() {
             entryAddress={entryQ.data?.name}
           />
         )}
-        {rideLifecycle !== 'idle' && rideLifecycle !== 'completed' && <RideStatusPanel />}
+        {rideLifecycle !== 'idle' && rideLifecycle !== 'completed' && (
+          <RideStatusPanel
+            onCancel={() => rideId && cancelMutation.mutate(rideId)}
+            isCanceling={cancelMutation.isPending}
+          />
+        )}
         <ConfirmRideModal />
         <CompletedOverlay />
       </main>

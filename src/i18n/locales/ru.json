@@ -73,7 +73,9 @@
     "pointOnMap": "Точка на карте",
     "toastQrRetrieved": "QR-точка получена.",
     "toastQrRetrievedSignin": "QR-точка получена. Войдите, чтобы заказать.",
-    "toastRideCompleted": "Поездка #{{id}} завершена."
+    "toastRideCompleted": "Поездка #{{id}} завершена.",
+    "toastRideCancelled": "Поездка отменена.",
+    "toastCancelFailed": "Не удалось отменить поездку."
   },
   "completed": {
     "title": "Поездка завершена",
@@ -156,6 +158,8 @@
   "status": {
     "statusLabel": "Статус",
     "defaultDriver": "Назначен водитель APARU",
+    "cancelRide": "Отменить поездку",
+    "canceling": "Отмена...",
     "searching": {
       "title": "Поиск водителя",
       "subtitle": "Обычно занимает 10-40 секунд"
