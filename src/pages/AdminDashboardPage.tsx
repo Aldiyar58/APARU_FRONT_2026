@@ -12,6 +12,7 @@ import {
   type QrGenerateResponse,
   type AdminCreateDriverResponse,
 } from '../services/backend/adminApi'
+import { apiClient } from '../services/apiClient'
 import { queryClient } from '../services/queryClient'
 import { useAuthStore } from '../store/authStore'
 import { useUiStore } from '../store/uiStore'
@@ -60,6 +61,22 @@ export function AdminDashboardPage() {
   const [vehicleModel, setVehicleModel] = useState('')
   const [licensePlate, setLicensePlate] = useState('')
   const [createdDriver, setCreatedDriver] = useState<AdminCreateDriverResponse | null>(null)
+
+  // ── STATS section state ──
+  const [statsUserId, setStatsUserId] = useState('')
+  const statsUserIdVal = statsUserId ? Number(statsUserId) : null
+
+  const scanStatsQ = useQuery({
+    queryKey: ['admin-qr-scans', statsUserIdVal],
+    queryFn: async () => {
+      const [scans, unique] = await Promise.all([
+        apiClient.get<any[]>(`/admin/users/${statsUserIdVal}/qr-scans`),
+        apiClient.get<any[]>(`/admin/users/${statsUserIdVal}/qr-points/unique`)
+      ])
+      return { total: scans.data.length, unique: unique.data.length }
+    },
+    enabled: !!statsUserIdVal,
+  })
 
   const pointsQ = useQuery({
     queryKey: ['admin-qr-points'],
@@ -210,6 +227,38 @@ export function AdminDashboardPage() {
               </p>
             )}
           </div>
+        )}
+      </Card>
+
+      {/* ── QR scan stats ── */}
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="text-lg font-semibold text-graphite-900">QR scan statistics</h2>
+          <p className="mt-1 text-sm text-graphite-500">
+            Check scans and unique points for a user.
+          </p>
+        </div>
+        <div className="grid content-start gap-3 sm:max-w-md">
+          <Input
+            value={statsUserId}
+            onChange={(e) => setStatsUserId(e.target.value)}
+            placeholder="User ID"
+            inputMode="numeric"
+          />
+        </div>
+        {scanStatsQ.isSuccess && scanStatsQ.data && (
+          <div className="rounded-xl border border-graphite-100 bg-graphite-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">Stats for User {statsUserIdVal}</p>
+            <p className="mt-1 font-medium text-graphite-900">
+              Total scans: {scanStatsQ.data.total}
+            </p>
+            <p className="mt-1 font-medium text-graphite-900">
+              Unique points: {scanStatsQ.data.unique}
+            </p>
+          </div>
+        )}
+        {scanStatsQ.isError && (
+          <p className="text-sm text-red-600">{(scanStatsQ.error as Error).message}</p>
         )}
       </Card>
 

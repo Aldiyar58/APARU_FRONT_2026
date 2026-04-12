@@ -6,6 +6,10 @@ export async function fetchAvailableDriverRides(): Promise<BackendRide[]> {
   return data
 }
 
+export async function updateDriverLocation(lat: number, lng: number): Promise<void> {
+  await apiClient.patch('/driver/me/location', { lat, lng })
+}
+
 async function driverRideAction(rideId: number, action: 'accept' | 'arrived' | 'start' | 'complete'): Promise<BackendRide> {
   const { data } = await apiClient.post<BackendRide>(`/driver/rides/${rideId}/${action}`)
   return data

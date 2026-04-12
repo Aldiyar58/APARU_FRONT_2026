@@ -40,6 +40,21 @@ export async function createRide(params: {
   return data
 }
 
+export async function createRideFromQr(params: {
+  qrPointId: string
+  pointB: BackendLatLng
+  tariff: string
+  paymentMethod: string
+}): Promise<RideCreateResponse> {
+  const { data } = await apiClient.post<RideCreateResponse>('/ride/create-from-qr', {
+    qrPointId: params.qrPointId,
+    pointB: params.pointB,
+    tariff: params.tariff,
+    paymentMethod: params.paymentMethod,
+  })
+  return data
+}
+
 export async function getRide(rideId: number): Promise<BackendRide> {
   const { data } = await apiClient.get<BackendRide>(`/ride/${rideId}`)
   return data

@@ -6,7 +6,7 @@ export type RideLifecycle = 'idle' | BackendRideStatus
 
 export type LatLng = { lat: number; lng: number }
 
-export type Tariff = 'economy' | 'comfort'
+export type Tariff = 'economy' | 'optimal' | 'comfort' | 'business'
 export type PaymentMethod = 'cash' | 'kaspi' | 'halyq'
 
 function driverLabelFor(driverId: number | null): string | null {

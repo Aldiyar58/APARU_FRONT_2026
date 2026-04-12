@@ -10,6 +10,7 @@ import {
   fetchAvailableDriverRides,
   markDriverRideArrived,
   startDriverRide,
+  updateDriverLocation,
 } from '../services/backend/driverApi'
 import type { BackendRide } from '../services/backend/rideApi'
 import { queryClient } from '../services/queryClient'
@@ -57,15 +58,30 @@ export function DriverActiveRidesPage() {
   useEffect(() => {
     if (!navigator.geolocation) return
 
+    let lastPos: { lat: number, lng: number } | null = null
+
     const watchId = navigator.geolocation.watchPosition(
-      (pos) => setDriverPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => {
+        const p = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        setDriverPos(p)
+        lastPos = p
+      },
       () => {
         /* ignore errors silently */
       },
       { enableHighAccuracy: true, maximumAge: 5_000 },
     )
 
-    return () => navigator.geolocation.clearWatch(watchId)
+    const intervalId = setInterval(() => {
+      if (lastPos) {
+        updateDriverLocation(lastPos.lat, lastPos.lng).catch(() => {})
+      }
+    }, 10_000)
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId)
+      clearInterval(intervalId)
+    }
   }, [])
 
   const availableQ = useQuery({

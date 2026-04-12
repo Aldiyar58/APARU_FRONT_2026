@@ -1,4 +1,4 @@
-﻿import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { BonusScreen } from '../features/bonus/BonusScreen'
@@ -12,7 +12,7 @@ import { RideStatusPanel } from '../features/ride/RideStatusPanel'
 import { RouteSync } from '../features/ride/RouteSync'
 import { useQrSearchParams } from '../hooks/useQrSearchParams'
 import { fetchBonusSummary } from '../services/backend/bonusApi'
-import { fetchQrEntry } from '../services/backend/entryApi'
+import { fetchQrPoint } from '../services/backend/entryApi'
 import { getRide } from '../services/backend/rideApi'
 import { fetchMe } from '../services/backend/userApi'
 import { useAuthStore } from '../store/authStore'
@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom'
 
 export function MapHomePage() {
   const { search } = useLocation()
-  const { lat, lng, pointId } = useQrSearchParams(search)
+  const { pointId } = useQrSearchParams(search)
 
   const setQrContext = useRideStore((s) => s.setQrContext)
   const setPickupAddress = useRideStore((s) => s.setPickupAddress)
@@ -40,22 +40,11 @@ export function MapHomePage() {
   const lastHandledEntry = useRef<string | null>(null)
   const lastCompletedRide = useRef<number | null>(null)
 
-  useLayoutEffect(() => {
-    if (lat != null && lng != null) {
-      setQrContext(pointId, { lat, lng })
-    }
-  }, [lat, lng, pointId, setQrContext])
-
-  const validEntry = lat != null && lng != null && (pointId?.trim().length ?? 0) > 0
+  const validEntry = (pointId?.trim().length ?? 0) > 0
 
   const entryQ = useQuery({
-    queryKey: ['entry', lat, lng, pointId, accessToken],
-    queryFn: () =>
-      fetchQrEntry({
-        lat: lat!,
-        lng: lng!,
-        pointId: pointId!,
-      }),
+    queryKey: ['qr-point', pointId],
+    queryFn: () => fetchQrPoint(pointId!),
     enabled: validEntry,
   })
 
@@ -78,16 +67,16 @@ export function MapHomePage() {
     if (lastHandledEntry.current === stamp) return
     lastHandledEntry.current = stamp
 
-    if (entryQ.data.address) {
-      setPickupAddress(entryQ.data.address)
+    setQrContext(pointId, { lat: entryQ.data.lat, lng: entryQ.data.lng })
+
+    if (entryQ.data.name) {
+      setPickupAddress(entryQ.data.name)
     }
 
     if (accessToken) {
-      setBonusBalance(entryQ.data.bonus_balance)
-      pushToast(`QR point scanned. Bonuses: ${entryQ.data.bonus_balance}`, 'success')
+      pushToast('QR point retrieved.', 'success')
     } else {
-      setBonusBalance(null)
-      pushToast('QR point scanned. Sign in to collect bonus points on the server.', 'info')
+      pushToast('QR point retrieved. Sign in to order.', 'info')
     }
   }, [
     entryQ.isSuccess,
@@ -96,7 +85,7 @@ export function MapHomePage() {
     pointId,
     accessToken,
     setPickupAddress,
-    setBonusBalance,
+    setQrContext,
     pushToast,
   ])
 
@@ -149,7 +138,7 @@ export function MapHomePage() {
             reverseLoading={entryQ.isPending}
             reverseError={(entryQ.error as Error | null) ?? null}
             reverseData={undefined}
-            entryAddress={entryQ.data?.address}
+            entryAddress={entryQ.data?.name}
           />
         )}
         {rideLifecycle !== 'idle' && rideLifecycle !== 'completed' && <RideStatusPanel />}

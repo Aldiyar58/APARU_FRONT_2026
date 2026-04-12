@@ -10,8 +10,10 @@ import { useTripRoute } from './useTripRoute'
 import { cn } from '../../utils/cn'
 
 const TARIFFS: { value: Tariff; label: string; desc: string }[] = [
-  { value: 'economy', label: 'Эконом', desc: 'Доступная цена' },
-  { value: 'comfort', label: 'Комфорт', desc: 'Более высокий класс' },
+  { value: 'economy', label: 'Эконом', desc: '150 ₸/км' },
+  { value: 'optimal', label: 'Оптимал', desc: '200 ₸/км' },
+  { value: 'comfort', label: 'Комфорт', desc: '250 ₸/км' },
+  { value: 'business', label: 'Бизнес', desc: '350 ₸/км' },
 ]
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [

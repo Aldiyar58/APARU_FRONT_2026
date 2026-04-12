@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Input } from '../../components/ui/Input'
 import { sendOtpCode, verifyOtp } from '../../services/backend/authApi'
-import { createRide } from '../../services/backend/rideApi'
+import { createRide, createRideFromQr } from '../../services/backend/rideApi'
 import { useAuthStore } from '../../store/authStore'
 import { useRideStore } from '../../store/rideStore'
 import { useUiStore } from '../../store/uiStore'
@@ -13,7 +13,16 @@ import { cn } from '../../utils/cn'
 
 const TARIFF_LABELS: Record<string, string> = {
   economy: 'Эконом',
+  optimal: 'Оптимальный',
   comfort: 'Комфорт',
+  business: 'Бизнес',
+}
+
+const TARIFF_COEFS: Record<string, number> = {
+  economy: 150,
+  optimal: 200,
+  comfort: 250,
+  business: 350,
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -87,7 +96,12 @@ export function ConfirmRideModal() {
     setPendingOrder(false)
     setSubmitting(true)
 
-    createRide({ pointA: pickup, pointB: destination, tariff, paymentMethod })
+    const qrPointId = useRideStore.getState().qrPointId
+    const apiCall = qrPointId
+      ? createRideFromQr({ qrPointId, pointB: destination, tariff, paymentMethod })
+      : createRide({ pointA: pickup, pointB: destination, tariff, paymentMethod })
+
+    apiCall
       .then((response) => {
         if (response.route) setRoute(response.route)
         applyRide(response.ride)
@@ -160,6 +174,14 @@ export function ConfirmRideModal() {
                 <span className="font-semibold text-graphite-900">{formatDistanceMeters(route?.Distance)}</span>
                 <span className="text-graphite-300">·</span>
                 <span>{formatDurationMs(route?.Time)}</span>
+                {route?.Distance && (
+                  <>
+                    <span className="text-graphite-300">·</span>
+                    <span className="font-semibold text-graphite-900">
+                      {Math.round((route.Distance / 1000) * TARIFF_COEFS[tariff])} ₸
+                    </span>
+                  </>
+                )}
               </li>
             </ul>
 
@@ -263,12 +285,16 @@ export function ConfirmRideModal() {
 
                     setSubmitting(true)
                     try {
-                      const response = await createRide({
-                        pointA: pickup,
-                        pointB: destination,
-                        tariff,
-                        paymentMethod,
-                      })
+                      const qrPointId = useRideStore.getState().qrPointId
+                      const apiCall = qrPointId
+                        ? createRideFromQr({ qrPointId, pointB: destination, tariff, paymentMethod })
+                        : createRide({
+                            pointA: pickup,
+                            pointB: destination,
+                            tariff,
+                            paymentMethod,
+                          })
+                      const response = await apiCall
                       if (response.route) {
                         setRoute(response.route)
                       }

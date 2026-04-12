@@ -1,23 +1,13 @@
 import { apiClient } from '../apiClient'
 
-export type EntryResponse = {
+export type QrPointResponse = {
+  id: number
+  name: string
   lat: number
   lng: number
-  address: string | null
-  bonus_balance: number
 }
 
-export async function fetchQrEntry(params: {
-  lat: number
-  lng: number
-  pointId: string
-}): Promise<EntryResponse> {
-  const { data } = await apiClient.get<EntryResponse>('/entry', {
-    params: {
-      lat: params.lat,
-      lng: params.lng,
-      point_id: params.pointId,
-    },
-  })
+export async function fetchQrPoint(id: string): Promise<QrPointResponse> {
+  const { data } = await apiClient.get<QrPointResponse>(`/qr-points/${id}`)
   return data
 }
