@@ -1,4 +1,5 @@
-﻿import { Card } from '../../components/ui/Card'
+import { useTranslation } from 'react-i18next'
+import { Card } from '../../components/ui/Card'
 import { useRideStore } from '../../store/rideStore'
 import { cn } from '../../utils/cn'
 
@@ -22,15 +23,13 @@ const copy: Record<string, { title: string; subtitle: string }> = {
 }
 
 export function RideStatusPanel() {
+  const { t } = useTranslation()
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
   const driverLabel = useRideStore((s) => s.driverLabel)
 
-  const statusCopy = copy[rideLifecycle]
-  if (rideLifecycle === 'idle' || rideLifecycle === 'completed' || !statusCopy) {
+  if (rideLifecycle === 'idle' || rideLifecycle === 'completed' || !copy[rideLifecycle]) {
     return null
   }
-
-  const { title, subtitle } = statusCopy
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[600] flex justify-center md:p-4 md:pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -52,12 +51,12 @@ export function RideStatusPanel() {
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-graphite-400 sm:text-xs">Status</p>
-              <h3 className="text-base font-semibold text-graphite-900 sm:text-lg">{title}</h3>
-              <p className="text-sm text-graphite-500">{subtitle}</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-graphite-400 sm:text-xs">{t('status.statusLabel', 'Status')}</p>
+              <h3 className="text-base font-semibold text-graphite-900 sm:text-lg">{t(`status.${rideLifecycle}.title`, copy[rideLifecycle].title)}</h3>
+              <p className="text-sm text-graphite-500">{t(`status.${rideLifecycle}.subtitle`, copy[rideLifecycle].subtitle)}</p>
               {rideLifecycle !== 'searching' && (
                 <p className="mt-2 truncate text-sm font-medium text-graphite-800">
-                  {driverLabel ?? 'APARU driver assigned'}
+                  {driverLabel ?? t('status.defaultDriver', 'APARU driver assigned')}
                 </p>
               )}
             </div>

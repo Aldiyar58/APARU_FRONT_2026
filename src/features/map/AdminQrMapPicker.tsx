@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { BackendQrPoint } from '../../services/backend/adminApi'
@@ -61,6 +62,7 @@ function MapSelectionEvents({ onSelect }: { onSelect: (point: { lat: number; lng
 }
 
 export function AdminQrMapPicker({ className, points = [], selected, onSelect }: AdminQrMapPickerProps) {
+  const { t } = useTranslation()
   const center: [number, number] = selected ? [selected.lat, selected.lng] : defaultCenter
   const zoom = selected ? selectedZoom : defaultZoom
 
@@ -93,7 +95,7 @@ export function AdminQrMapPicker({ className, points = [], selected, onSelect }:
       </MapContainer>
 
       <div className="border-t border-graphite-100 bg-white px-4 py-3 text-sm text-graphite-500">
-        Click anywhere on the map to fill in latitude and longitude.
+        {t('admin.mapClickHint', 'Click anywhere on the map to fill in latitude and longitude.')}
       </div>
     </div>
   )

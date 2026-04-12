@@ -1,0 +1,202 @@
+{
+  "header": {
+    "brand": "APARU",
+    "title": "QR Taxi",
+    "login": "Войти",
+    "admin": "Админ",
+    "driver": "Водитель",
+    "logout": "Выйти"
+  },
+  "bonus": {
+    "txScan": "Бонус за QR-скан",
+    "txRideId": "Бонус за поездку #{{id}}",
+    "txRide": "Бонус за поездку",
+    "txRedeem": "Списанные баллы",
+    "txUpdate": "Обновление бонусов",
+    "redeemedToast": "Списано {{points}} баллов за скидку {{discount}}%.",
+    "balanceLabel": "Баланс",
+    "pointsLabel": "баллов",
+    "closeBtn": "Закрыть",
+    "unauthDesc": "Войдите, чтобы просматривать историю бонусов и использовать баллы.",
+    "authDesc": "Ваши бонусы синхронизируются с сервером.",
+    "redeem100": "Списать 100 баллов",
+    "redeem300": "Списать 300 баллов",
+    "loadingHistory": "Загрузка истории бонусов...",
+    "historyTitle": "История",
+    "noActivity": "Пока нет бонусной активности."
+  },
+  "admin": {
+    "mapClickHint": "Нажмите в любом месте на карте, чтобы заполнить долготу и широту.",
+    "qrGenerated": "QR-точка #{{id}} сгенерирована.",
+    "driverCreated": "Водитель {{name}} создан.",
+    "dashboardTitle": "Панель администратора",
+    "dashboardDesc": "Генерация и список QR-точек.",
+    "backToMap": "На карту",
+    "loggedOut": "Вы вышли из системы",
+    "logout": "Выйти",
+    "addDriverTitle": "Добавить водителя",
+    "addDriverDesc": "Создать нового пользователя с ролью водителя.",
+    "errPhoneName": "Укажите телефон и имя водителя.",
+    "errVehicle": "Укажите и модель авто, и гос. номер — или оставьте оба поля пустыми.",
+    "phonePlh": "Телефон (+7...)",
+    "namePlh": "Имя водителя",
+    "modelPlh": "Модель авто (опционально)",
+    "platePlh": "Гос. номер (опционально)",
+    "creating": "Создание...",
+    "createBtn": "Создать водителя",
+    "createdLabel": "Создан",
+    "scanStatsTitle": "Статистика QR-сканов",
+    "scanStatsDesc": "Проверьте сканирования пользователя.",
+    "userIdPlh": "ID пользователя",
+    "statsForUser": "Статистика для пользователя {{id}}",
+    "totalScans": "Всего сканирований:",
+    "uniquePoints": "Уникальных точек:",
+    "generateQrTitle": "Сгенерировать QR-точку",
+    "generateQrDesc": "Создайте QR-точку в системе.",
+    "errGenerate": "Укажите имя, широту и долготу.",
+    "pointNamePlh": "Название точки",
+    "latPlh": "Широта",
+    "lngPlh": "Долгота",
+    "coordinatesHint": "Можно ввести координаты вручную или выбрать на карте.",
+    "generatingBtn": "Генерация...",
+    "generateBtn": "Сгенерировать QR",
+    "latestQrTitle": "Последний QR",
+    "downloadPngBtn": "Скачать PNG",
+    "openQrLinkBtn": "Открыть ссылку",
+    "qrPointsTitle": "QR-точки",
+    "refreshBtn": "Обновить",
+    "loadingPoints": "Загрузка QR-точек...",
+    "createdAt": "Создано",
+    "noPoints": "Ещё нет созданных QR-точек."
+  },
+  "map": {
+    "pointOnMap": "Точка на карте",
+    "toastQrRetrieved": "QR-точка получена.",
+    "toastQrRetrievedSignin": "QR-точка получена. Войдите, чтобы заказать.",
+    "toastRideCompleted": "Поездка #{{id}} завершена."
+  },
+  "completed": {
+    "title": "Поездка завершена",
+    "desc": "Спасибо, что выбрали APARU. Скачайте приложение для бонусов и истории поездок.",
+    "downloadBtn": "Скачать приложение",
+    "newRideBtn": "Новая поездка"
+  },
+  "ride": {
+    "createdToast": "Поездка #{{id}} создана."
+  },
+  "confirm": {
+    "title": "Подтверждение поездки",
+    "desc": "Проверьте данные и нажмите «Подтвердить» для создания заказа.",
+    "pickup": "Точка подачи",
+    "destination": "Место назначения",
+    "authRequired": "Для создания заказа необходимо войти в аккаунт",
+    "sending": "Отправка...",
+    "authSuccess": "Вы авторизованы! Создаём заказ...",
+    "checking": "Проверка...",
+    "loginAndOrder": "Войти и заказать",
+    "errPoints": "Укажите обе точки маршрута.",
+    "creating": "Создание...",
+    "submit": "Подтвердить",
+    "back": "Назад",
+    "tariff": {
+      "economy": "Эконом",
+      "optimal": "Оптимал",
+      "comfort": "Комфорт",
+      "business": "Бизнес"
+    },
+    "tariffDesc": {
+      "economy": "150 ₸/км",
+      "optimal": "200 ₸/км",
+      "comfort": "250 ₸/км",
+      "business": "350 ₸/км"
+    },
+    "payment": {
+      "cash": "Наличные",
+      "kaspi": "Kaspi",
+      "halyq": "Halyk"
+    }
+  },
+  "auth": {
+    "codeSent": "Код отправлен",
+    "getCode": "Получить код",
+    "changePhone": "Изменить номер",
+    "codeValid": "Код действует {{ttl}} сек.",
+    "titleSms": "Вход по SMS",
+    "subtitleSms": "Мы отправим одноразовый код. После входа вы будете перенаправлены в нужный раздел по роли.",
+    "phone": "Телефон",
+    "smsCode": "Код из SMS",
+    "login": "Войти",
+    "toMap": "На карту",
+    "sessionCleared": "Сессия сброшена",
+    "logoutLocal": "Выйти (локально)"
+  },
+  "search": {
+    "placeholder": "Куда едем?",
+    "noResults": "Нет совпадений. Уточните запрос или выберите точку на карте.",
+    "onMapBtn": "На карте",
+    "mapPickHint": "Нажмите на карте, чтобы указать точку назначения"
+  },
+  "home": {
+    "from": "Откуда",
+    "addressReceived": "Адрес получен",
+    "awaitingQr": "Ожидаем точку QR",
+    "tariff": "Тариф",
+    "payment": "Оплата",
+    "routing": "Маршрут…",
+    "orderBtn": "Заказать",
+    "resetBBtn": "Сбросить точку B"
+  },
+  "qr": {
+    "title": "Откройте ссылку из QR",
+    "desc1": "В ссылке должен быть",
+    "desc2": "После входа бонус +10 за скан начисляется на сервере.",
+    "loginBtn": "Войти по SMS",
+    "apiBase": "API base:"
+  },
+  "status": {
+    "statusLabel": "Статус",
+    "defaultDriver": "Назначен водитель APARU",
+    "searching": {
+      "title": "Поиск водителя",
+      "subtitle": "Обычно занимает 10-40 секунд"
+    },
+    "assigned": {
+      "title": "Водитель назначен",
+      "subtitle": "Направляется к вам"
+    },
+    "arrived": {
+      "title": "Водитель прибыл",
+      "subtitle": "Можете выходить"
+    },
+    "in_progress": {
+      "title": "В пути",
+      "subtitle": "Поездка выполняется"
+    }
+  },
+  "driver": {
+    "metersAway": "{{dist}} м от вас",
+    "kmAway": "{{dist}} км от вас",
+    "arrived": "Прибыл",
+    "startRide": "Начать поездку",
+    "completeRide": "Завершить поездку",
+    "rideCompleted": "Поездка #{{id}} завершена.",
+    "rideStatus": "Поездка #{{id}}: {{status}}.",
+    "dashboardTitle": "Панель водителя",
+    "yourLocation": "Ваше местоположение: ",
+    "detectingLocation": "Определяем ваше местоположение…",
+    "backToMap": "На карту",
+    "loggedOut": "Вы вышли из системы",
+    "logout": "Выйти",
+    "activeRideTitle": "Активная поездка",
+    "rideId": "Поездка #{{id}}",
+    "statusLabel": "Статус: {{status}}",
+    "savingBtn": "Сохранение...",
+    "noActions": "Нет доступных действий для этой поездки.",
+    "availableOrdersTitle": "Доступные заказы",
+    "refreshBtn": "Обновить",
+    "loadingOrders": "Загрузка заказов...",
+    "noPendingOrders": "Нет ожидающих заказов в данный момент.",
+    "orderId": "Заказ #{{id}}",
+    "acceptOrderBtn": "Принять заказ"
+  }
+}

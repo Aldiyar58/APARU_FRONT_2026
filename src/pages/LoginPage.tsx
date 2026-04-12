@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -14,6 +15,7 @@ function postLoginPath(role: string | null | undefined): string {
 }
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const setSession = useAuthStore((s) => s.setSession)
   const pushToast = useUiStore((s) => s.pushToast)
@@ -54,11 +56,10 @@ export function LoginPage() {
             APARU
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-graphite-900">
-            Вход по SMS
+            {t('auth.titleSms', 'Вход по SMS')}
           </h1>
           <p className="mt-2 text-sm text-graphite-500">
-            Мы отправим одноразовый код. После входа вы будете
-            перенаправлены в нужный раздел по роли.
+            {t('auth.subtitleSms', 'Мы отправим одноразовый код. После входа вы будете перенаправлены в нужный раздел по роли.')}
           </p>
         </div>
 
@@ -67,7 +68,7 @@ export function LoginPage() {
           <div className="space-y-3">
             <label className="block space-y-1.5">
               <span className="text-xs font-medium text-graphite-600">
-                Телефон
+                {t('auth.phone', 'Телефон')}
               </span>
               <Input
                 value={phone}
@@ -86,7 +87,7 @@ export function LoginPage() {
                   const r = await sendOtpCode(phone.trim())
                   setTtl(r.ttl_seconds)
                   setStep('code')
-                  pushToast('Код отправлен', 'success')
+                  pushToast(t('auth.codeSent', 'Код отправлен'), 'success')
                 } catch (e) {
                   pushToast((e as Error).message, 'error')
                 } finally {
@@ -94,7 +95,7 @@ export function LoginPage() {
                 }
               }}
             >
-              Получить код
+              {t('auth.getCode', 'Получить код')}
             </Button>
           </div>
         )}
@@ -104,7 +105,7 @@ export function LoginPage() {
           <div className="space-y-3 border-t border-graphite-100 pt-5">
             <label className="block space-y-1.5">
               <span className="text-xs font-medium text-graphite-600">
-                Код из SMS
+                {t('auth.smsCode', 'Код из SMS')}
               </span>
               <Input
                 value={code}
@@ -136,7 +137,7 @@ export function LoginPage() {
                 }
               }}
             >
-              Войти
+              {t('auth.login', 'Войти')}
             </Button>
 
             <button
@@ -144,12 +145,12 @@ export function LoginPage() {
               className="text-sm text-graphite-500 hover:underline"
               onClick={() => setStep('phone')}
             >
-              Изменить номер
+              {t('auth.changePhone', 'Изменить номер')}
             </button>
 
             {ttl != null && ttl > 0 && (
               <p className="text-xs text-graphite-500">
-                Код действует {ttl} сек.
+                {t('auth.codeValid', 'Код действует {{ttl}} сек.', { ttl })}
               </p>
             )}
           </div>
@@ -157,17 +158,17 @@ export function LoginPage() {
 
         <div className="flex justify-between text-sm">
           <Link className="text-aparu-dark hover:underline" to="/">
-            На карту
+            {t('auth.toMap', 'На карту')}
           </Link>
           <button
             type="button"
             className="text-graphite-500 hover:text-graphite-800"
             onClick={() => {
               useAuthStore.getState().clearSession()
-              pushToast('Сессия сброшена', 'info')
+              pushToast(t('auth.sessionCleared', 'Сессия сброшена'), 'info')
             }}
           >
-            Выйти (локально)
+            {t('auth.logoutLocal', 'Выйти (локально)')}
           </button>
         </div>
       </Card>

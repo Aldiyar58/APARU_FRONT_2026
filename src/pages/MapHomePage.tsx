@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { BonusScreen } from '../features/bonus/BonusScreen'
 import { MapPane } from '../features/map/MapPane'
@@ -18,9 +18,11 @@ import { fetchMe } from '../services/backend/userApi'
 import { useAuthStore } from '../store/authStore'
 import { useRideStore } from '../store/rideStore'
 import { useUiStore } from '../store/uiStore'
+import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
 export function MapHomePage() {
+  const { t } = useTranslation()
   const { search } = useLocation()
   const { pointId } = useQrSearchParams(search)
 
@@ -74,9 +76,9 @@ export function MapHomePage() {
     }
 
     if (accessToken) {
-      pushToast('QR point retrieved.', 'success')
+      pushToast(t('map.toastQrRetrieved', 'QR point retrieved.'), 'success')
     } else {
-      pushToast('QR point retrieved. Sign in to order.', 'info')
+      pushToast(t('map.toastQrRetrievedSignin', 'QR point retrieved. Sign in to order.'), 'info')
     }
   }, [
     entryQ.isSuccess,
@@ -113,7 +115,7 @@ export function MapHomePage() {
     if (lastCompletedRide.current === rideQ.data.id) return
     lastCompletedRide.current = rideQ.data.id
 
-    pushToast(`Ride #${rideQ.data.id} completed.`, 'success')
+    pushToast(t('map.toastRideCompleted', 'Ride #{{id}} completed.', { id: rideQ.data.id }), 'success')
 
     if (!accessToken) return
 
