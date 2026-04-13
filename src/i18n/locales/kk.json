@@ -1,0 +1,206 @@
+{
+  "header": {
+    "brand": "APARU",
+    "title": "QR Taxi",
+    "login": "Кіру",
+    "admin": "Әкімші",
+    "driver": "Жүргізуші",
+    "logout": "Шығу"
+  },
+  "bonus": {
+    "txScan": "QR сканерлеу бонусы",
+    "txRideId": "#{{id}} сапар бонусы",
+    "txRide": "Сапар бонусы",
+    "txRedeem": "Жұмсалған ұпайлар",
+    "txUpdate": "Бонустарды жаңарту",
+    "redeemedToast": "{{discount}}% жеңілдік үшін {{points}} ұпай жұмсалды.",
+    "balanceLabel": "Теңгерім",
+    "pointsLabel": "ұпай",
+    "closeBtn": "Жабу",
+    "unauthDesc": "Бонус тарихын көру және ұпай жұмсау үшін жүйеге кіріңіз.",
+    "authDesc": "Сіздің бонустарыңыз сервермен синхрондалған.",
+    "redeem100": "100 ұпайды жұмсау",
+    "redeem300": "300 ұпайды жұмсау",
+    "loadingHistory": "Бонустар тарихы жүктелуде...",
+    "historyTitle": "Тарих",
+    "noActivity": "Әзірге бонус белсенділігі жоқ."
+  },
+  "admin": {
+    "mapClickHint": "Ендік пен бойлықты толтыру үшін картаның кез келген жерін басыңыз.",
+    "qrGenerated": "QR-нүкте #{{id}} құрылды.",
+    "driverCreated": "Жүргізуші {{name}} құрылды.",
+    "dashboardTitle": "Әкімші тақтасы",
+    "dashboardDesc": "QR нүктелерін жасау және тізімдеу.",
+    "backToMap": "Картаға оралу",
+    "loggedOut": "Жүйеден шықтыңыз",
+    "logout": "Шығу",
+    "addDriverTitle": "Жүргізуші қосу",
+    "addDriverDesc": "Жүргізуші рөлі бар жаңа пайдаланушы жасау.",
+    "errPhoneName": "Телефон мен жүргізуші атын көрсетіңіз.",
+    "errVehicle": "Көлік үлгісін және мемл. нөмірін көрсетіңіз немесе екеуін де бос қалдырыңыз.",
+    "phonePlh": "Телефон (+7...)",
+    "namePlh": "Жүргізуші аты",
+    "modelPlh": "Көлік үлгісі (міндетті емес)",
+    "platePlh": "Мемлекеттік нөмір (міндетті емес)",
+    "creating": "Құрылуда...",
+    "createBtn": "Жүргізуші жасау",
+    "createdLabel": "Құрылды",
+    "scanStatsTitle": "QR сканерлеу статистикасы",
+    "scanStatsDesc": "Пайдаланушы сканерлеулерін тексеріңіз.",
+    "userIdPlh": "Пайдаланушы ID-і",
+    "statsForUser": "{{id}} пайдаланушысы үшін статистика",
+    "totalScans": "Барлығы:",
+    "uniquePoints": "Бірегей нүктелер:",
+    "generateQrTitle": "QR-нүкте құру",
+    "generateQrDesc": "Жүйеде QR нүктесін жасаңыз.",
+    "errGenerate": "Атын, ендік пен бойлықты енгізіңіз.",
+    "pointNamePlh": "Нүкте атауы",
+    "latPlh": "Ендік",
+    "lngPlh": "Бойлық",
+    "coordinatesHint": "Координаттарды қолмен енгізуге немесе картадан таңдауға болады.",
+    "generatingBtn": "Құрылуда...",
+    "generateBtn": "QR құру",
+    "latestQrTitle": "Соңғы QR",
+    "downloadPngBtn": "PNG жүктеп алу",
+    "openQrLinkBtn": "Сілтемені ашу",
+    "qrPointsTitle": "QR-нүктелер",
+    "refreshBtn": "Жаңарту",
+    "loadingPoints": "QR-нүктелер жүктелуде...",
+    "createdAt": "Құрылған уақыты",
+    "noPoints": "Әзірге жасалған QR-нүктелер жоқ."
+  },
+  "map": {
+    "pointOnMap": "Картадағы нүкте",
+    "toastQrRetrieved": "QR-нүкте алынды.",
+    "toastQrRetrievedSignin": "QR-нүкте алынды. Тапсырыс беру үшін жүйеге кіріңіз.",
+    "toastRideCompleted": "Сапар #{{id}} аяқталды.",
+    "toastRideCancelled": "Сапар тоқтатылды.",
+    "toastCancelFailed": "Сапарды тоқтату сәтсіз аяқталды."
+  },
+  "completed": {
+    "title": "Сапар аяқталды",
+    "desc": "APARU таңдағаныңызға рахмет. Бонустар мен сапар тарихы үшін қолданбаны жүктеп алыңыз.",
+    "downloadBtn": "Қолданбаны жүктеп алу",
+    "newRideBtn": "Жаңа сапар"
+  },
+  "ride": {
+    "createdToast": "Сапар #{{id}} құрылды."
+  },
+  "confirm": {
+    "title": "Сапарды растау",
+    "desc": "Мәліметтерді тексеріп, тапсырыс жасау үшін «Растау» түймесін басыңыз.",
+    "pickup": "Алып кету нүктесі",
+    "destination": "Баратын жер",
+    "authRequired": "Тапсырыс жасау үшін жүйеге кіру қажет",
+    "sending": "Жіберілуде...",
+    "authSuccess": "Авторизация сәтті өтті! Тапсырыс жасалуда...",
+    "checking": "Тексеру...",
+    "loginAndOrder": "Кіру және тапсырыс беру",
+    "errPoints": "Екі бағыттың нүктесін де көрсетіңіз.",
+    "creating": "Құрылуда...",
+    "submit": "Растау",
+    "back": "Артқа",
+    "tariff": {
+      "economy": "Эконом",
+      "optimal": "Оптимал",
+      "comfort": "Комфорт",
+      "business": "Бизнес"
+    },
+    "tariffDesc": {
+      "economy": "150 ₸/км",
+      "optimal": "200 ₸/км",
+      "comfort": "250 ₸/км",
+      "business": "350 ₸/км"
+    },
+    "payment": {
+      "cash": "Қолма-қол",
+      "kaspi": "Kaspi",
+      "halyq": "Halyk"
+    }
+  },
+  "auth": {
+    "codeSent": "Код жіберілді",
+    "getCode": "Кодты алу",
+    "changePhone": "Нөмірді өзгерту",
+    "codeValid": "Код {{ttl}} сек. жарамды",
+    "titleSms": "SMS арқылы кіру",
+    "subtitleSms": "Біз бір реттік код жібереміз. Кіргеннен кейін тиісті бөлімге өтесіз.",
+    "phone": "Телефон",
+    "smsCode": "SMS коды",
+    "login": "Кіру",
+    "toMap": "Картаға",
+    "sessionCleared": "Сеанс тазартылды",
+    "logoutLocal": "Шығу (жергілікті)"
+  },
+  "search": {
+    "placeholder": "Қайда барамыз?",
+    "noResults": "Ешнәрсе табылмады. Сұрауды нақтылаңыз немесе картадан нүкте таңдаңыз.",
+    "onMapBtn": "Картадан",
+    "mapPickHint": "Баратын жерді көрсету үшін картаны басыңыз"
+  },
+  "home": {
+    "from": "Қайдан",
+    "addressReceived": "Мекенжай алынды",
+    "awaitingQr": "QR нүктесін күтудеміз",
+    "tariff": "Тариф",
+    "payment": "Төлем",
+    "routing": "Маршрут...",
+    "orderBtn": "Тапсырыс беру",
+    "resetBBtn": "Тоқтату (B нүктесі)"
+  },
+  "qr": {
+    "title": "QR сілтемені ашыңыз",
+    "desc1": "Сілтемеде міндетті түрде ",
+    "desc2": " болуы тиіс. Жүйеге кірген соң сканерлеу үшін серверде +10 бонус есептеледі.",
+    "loginBtn": "SMS арқылы кіру",
+    "apiBase": "API базасы:"
+  },
+  "status": {
+    "statusLabel": "Күйі",
+    "defaultDriver": "APARU жүргізушісі тағайындалды",
+    "cancelRide": "Сапардан бас тарту",
+    "canceling": "Бас тарту...",
+    "searching": {
+      "title": "Жүргізушіні іздеу",
+      "subtitle": "Әдетте 10-40 секунд алады"
+    },
+    "assigned": {
+      "title": "Жүргізуші тағайындалды",
+      "subtitle": "Сізге жол тартты"
+    },
+    "arrived": {
+      "title": "Жүргізуші келді",
+      "subtitle": "Шығуға болады"
+    },
+    "in_progress": {
+      "title": "Жолда",
+      "subtitle": "Сапар орындалуда"
+    }
+  },
+  "driver": {
+    "metersAway": "Сізден {{dist}} м",
+    "kmAway": "Сізден {{dist}} км",
+    "arrived": "Келді",
+    "startRide": "Сапарды бастау",
+    "completeRide": "Сапарды аяқтау",
+    "rideCompleted": "Сапар #{{id}} аяқталды.",
+    "rideStatus": "Сапар #{{id}}: {{status}}.",
+    "dashboardTitle": "Жүргізуші тақтасы",
+    "yourLocation": "Орналасқан жеріңіз: ",
+    "detectingLocation": "Орналасқан жеріңізді анықтаудамыз...",
+    "backToMap": "Картаға",
+    "loggedOut": "Жүйеден шықтыңыз",
+    "logout": "Шығу",
+    "activeRideTitle": "Белсенді сапар",
+    "rideId": "Сапар #{{id}}",
+    "statusLabel": "Күйі: {{status}}",
+    "savingBtn": "Сақталуда...",
+    "noActions": "Бұл сапар үшін әрекеттер жоқ.",
+    "availableOrdersTitle": "Қолжетімді тапсырыстар",
+    "refreshBtn": "Жаңарту",
+    "loadingOrders": "Тапсырыстар жүктелуде...",
+    "noPendingOrders": "Қазіргі уақытта күтудегі тапсырыстар жоқ.",
+    "orderId": "Тапсырыс #{{id}}",
+    "acceptOrderBtn": "Тапсырысты қабылдау"
+  }
+}

@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -42,6 +43,7 @@ function buildQrFilename(generated: QrGenerateResponse) {
 }
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation()
   const pushToast = useUiStore((s) => s.pushToast)
 
   // ── QR section state ──
@@ -88,7 +90,7 @@ export function AdminDashboardPage() {
     onSuccess: async (data) => {
       setGenerated(data)
       setName('')
-      pushToast(`QR point #${data.qr_point.id} generated.`, 'success')
+      pushToast(t('admin.qrGenerated', 'QR point #{{id}} generated.', { id: data.qr_point.id }), 'success')
       await queryClient.invalidateQueries({ queryKey: ['admin-qr-points'] })
     },
     onError: (error) => {
@@ -104,7 +106,7 @@ export function AdminDashboardPage() {
       setDriverName('')
       setVehicleModel('')
       setLicensePlate('')
-      pushToast(`Водитель ${data.profile.name ?? data.profile.phone} создан.`, 'success')
+      pushToast(t('admin.driverCreated', 'Водитель {{name}} создан.', { name: data.profile.name ?? data.profile.phone }), 'success')
     },
     onError: (error) => {
       pushToast((error as Error).message, 'error')
@@ -130,23 +132,23 @@ export function AdminDashboardPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4 px-4 py-10">
       <Card className="p-6">
-        <h1 className="text-2xl font-semibold text-graphite-900">Admin dashboard</h1>
+        <h1 className="text-2xl font-semibold text-graphite-900">{t('admin.dashboardTitle', 'Admin dashboard')}</h1>
         <p className="mt-2 text-sm text-graphite-600">
-          QR point generation and listing now use the real admin backend endpoints.
+          {t('admin.dashboardDesc', 'QR point generation and listing now use the real admin backend endpoints.')}
         </p>
         <div className="mt-4 flex items-center gap-4">
           <Link className="text-sm font-semibold text-aparu-dark hover:underline" to="/">
-            Back to map
+            {t('admin.backToMap', 'Back to map')}
           </Link>
           <button
             type="button"
             className="text-sm font-semibold text-graphite-500 hover:text-graphite-800 hover:underline"
             onClick={() => {
               useAuthStore.getState().clearSession()
-              pushToast('Вы вышли из системы', 'info')
+              pushToast(t('admin.loggedOut', 'Вы вышли из системы'), 'info')
             }}
           >
-            Выйти
+            {t('admin.logout', 'Выйти')}
           </button>
         </div>
       </Card>
@@ -154,9 +156,9 @@ export function AdminDashboardPage() {
       {/* ── Добавить водителя ── */}
       <Card className="space-y-4 p-6">
         <div>
-          <h2 className="text-lg font-semibold text-graphite-900">Добавить водителя</h2>
+          <h2 className="text-lg font-semibold text-graphite-900">{t('admin.addDriverTitle', 'Добавить водителя')}</h2>
           <p className="mt-1 text-sm text-graphite-500">
-            Создать нового пользователя с ролью водителя. Марка авто и гос. номер опциональны — либо оба, либо ни одного.
+            {t('admin.addDriverDesc', 'Создать нового пользователя с ролью водителя. Марка авто и гос. номер опциональны — либо оба, либо ни одного.')}
           </p>
         </div>
 
@@ -166,7 +168,7 @@ export function AdminDashboardPage() {
             event.preventDefault()
 
             if (!driverPhone.trim() || !driverName.trim()) {
-              pushToast('Укажите телефон и имя водителя.', 'error')
+              pushToast(t('admin.errPhoneName', 'Укажите телефон и имя водителя.'), 'error')
               return
             }
 
@@ -176,7 +178,7 @@ export function AdminDashboardPage() {
               (!vehicleModel.trim() && licensePlate.trim())
 
             if (partialVehicle) {
-              pushToast('Укажите и модель авто, и гос. номер — или оставьте оба поля пустыми.', 'error')
+              pushToast(t('admin.errVehicle', 'Укажите и модель авто, и гос. номер — или оставьте оба поля пустыми.'), 'error')
               return
             }
 
@@ -191,33 +193,33 @@ export function AdminDashboardPage() {
           <Input
             value={driverPhone}
             onChange={(e) => setDriverPhone(e.target.value)}
-            placeholder="Телефон (+7...)"
+            placeholder={t('admin.phonePlh', 'Телефон (+7...)')}
           />
           <Input
             value={driverName}
             onChange={(e) => setDriverName(e.target.value)}
-            placeholder="Имя водителя"
+            placeholder={t('admin.namePlh', 'Имя водителя')}
           />
           <Input
             value={vehicleModel}
             onChange={(e) => setVehicleModel(e.target.value)}
-            placeholder="Модель авто (опционально)"
+            placeholder={t('admin.modelPlh', 'Модель авто (опционально)')}
           />
           <Input
             value={licensePlate}
             onChange={(e) => setLicensePlate(e.target.value)}
-            placeholder="Гос. номер (опционально)"
+            placeholder={t('admin.platePlh', 'Гос. номер (опционально)')}
           />
           <div>
             <Button type="submit" disabled={driverMutation.isPending}>
-              {driverMutation.isPending ? 'Создание...' : 'Создать водителя'}
+              {driverMutation.isPending ? t('admin.creating', 'Создание...') : t('admin.createBtn', 'Создать водителя')}
             </Button>
           </div>
         </form>
 
         {createdDriver && (
           <div className="rounded-xl border border-graphite-100 bg-graphite-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">Создан</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">{t('admin.createdLabel', 'Создан')}</p>
             <p className="mt-1 font-medium text-graphite-900">
               {createdDriver.profile.name} — {createdDriver.profile.phone}
             </p>
@@ -233,27 +235,27 @@ export function AdminDashboardPage() {
       {/* ── QR scan stats ── */}
       <Card className="space-y-4 p-6">
         <div>
-          <h2 className="text-lg font-semibold text-graphite-900">QR scan statistics</h2>
+          <h2 className="text-lg font-semibold text-graphite-900">{t('admin.scanStatsTitle', 'QR scan statistics')}</h2>
           <p className="mt-1 text-sm text-graphite-500">
-            Check scans and unique points for a user.
+            {t('admin.scanStatsDesc', 'Check scans and unique points for a user.')}
           </p>
         </div>
         <div className="grid content-start gap-3 sm:max-w-md">
           <Input
             value={statsUserId}
             onChange={(e) => setStatsUserId(e.target.value)}
-            placeholder="User ID"
+            placeholder={t('admin.userIdPlh', 'User ID')}
             inputMode="numeric"
           />
         </div>
         {scanStatsQ.isSuccess && scanStatsQ.data && (
           <div className="rounded-xl border border-graphite-100 bg-graphite-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">Stats for User {statsUserIdVal}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-graphite-400">{t('admin.statsForUser', 'Stats for User {{id}}', { id: statsUserIdVal })}</p>
             <p className="mt-1 font-medium text-graphite-900">
-              Total scans: {scanStatsQ.data.total}
+              {t('admin.totalScans', 'Total scans:')} {scanStatsQ.data.total}
             </p>
             <p className="mt-1 font-medium text-graphite-900">
-              Unique points: {scanStatsQ.data.unique}
+              {t('admin.uniquePoints', 'Unique points:')} {scanStatsQ.data.unique}
             </p>
           </div>
         )}
@@ -265,9 +267,9 @@ export function AdminDashboardPage() {
       {/* ── Generate QR point ── */}
       <Card className="space-y-4 p-6">
         <div>
-          <h2 className="text-lg font-semibold text-graphite-900">Generate QR point</h2>
+          <h2 className="text-lg font-semibold text-graphite-900">{t('admin.generateQrTitle', 'Generate QR point')}</h2>
           <p className="mt-1 text-sm text-graphite-500">
-            Create a backend QR point and get the generated PNG immediately.
+            {t('admin.generateQrDesc', 'Create a backend QR point and get the generated PNG immediately.')}
           </p>
         </div>
 
@@ -278,7 +280,7 @@ export function AdminDashboardPage() {
               event.preventDefault()
 
               if (!name.trim() || latValue == null || lngValue == null) {
-                pushToast('Enter a name, latitude, and longitude.', 'error')
+                pushToast(t('admin.errGenerate', 'Enter a name, latitude, and longitude.'), 'error')
                 return
               }
 
@@ -289,15 +291,15 @@ export function AdminDashboardPage() {
               })
             }}
           >
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Point name" />
-            <Input value={lat} onChange={(e) => setLat(e.target.value)} placeholder="Latitude" inputMode="decimal" />
-            <Input value={lng} onChange={(e) => setLng(e.target.value)} placeholder="Longitude" inputMode="decimal" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('admin.pointNamePlh', 'Point name')} />
+            <Input value={lat} onChange={(e) => setLat(e.target.value)} placeholder={t('admin.latPlh', 'Latitude')} inputMode="decimal" />
+            <Input value={lng} onChange={(e) => setLng(e.target.value)} placeholder={t('admin.lngPlh', 'Longitude')} inputMode="decimal" />
             <p className="text-sm text-graphite-500">
-              You can type coordinates manually or pick them directly on the map.
+              {t('admin.coordinatesHint', 'You can type coordinates manually or pick them directly on the map.')}
             </p>
             <div>
               <Button type="submit" disabled={generateMutation.isPending}>
-                {generateMutation.isPending ? 'Generating...' : 'Generate QR'}
+                {generateMutation.isPending ? t('admin.generatingBtn', 'Generating...') : t('admin.generateBtn', 'Generate QR')}
               </Button>
             </div>
           </form>
@@ -313,7 +315,7 @@ export function AdminDashboardPage() {
       {generated && (
         <Card className="space-y-4 p-6">
           <div>
-            <h2 className="text-lg font-semibold text-graphite-900">Latest QR</h2>
+            <h2 className="text-lg font-semibold text-graphite-900">{t('admin.latestQrTitle', 'Latest QR')}</h2>
             <p className="mt-1 text-sm text-graphite-500">{generated.url}</p>
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -323,14 +325,14 @@ export function AdminDashboardPage() {
               className="w-full max-w-xs rounded-xl border border-graphite-200 bg-white p-3"
             />
             <div className="flex flex-wrap gap-3">
-              <Button onClick={handleDownloadQr}>Download PNG</Button>
+              <Button onClick={handleDownloadQr}>{t('admin.downloadPngBtn', 'Download PNG')}</Button>
               <a
                 href={generated.url}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl border border-graphite-200 px-5 py-3.5 text-[16px] font-semibold tracking-tight text-graphite-700 transition hover:bg-graphite-50 sm:min-h-0 sm:min-w-0 sm:text-[15px]"
               >
-                Open QR link
+                {t('admin.openQrLinkBtn', 'Open QR link')}
               </a>
             </div>
           </div>
@@ -339,13 +341,13 @@ export function AdminDashboardPage() {
 
       <Card className="p-6">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-graphite-900">QR points</h2>
+          <h2 className="text-lg font-semibold text-graphite-900">{t('admin.qrPointsTitle', 'QR points')}</h2>
           <Button variant="ghost" disabled={pointsQ.isFetching} onClick={() => void pointsQ.refetch()}>
-            Refresh
+            {t('admin.refreshBtn', 'Refresh')}
           </Button>
         </div>
 
-        {pointsQ.isPending && <p className="mt-4 text-sm text-graphite-500">Loading QR points...</p>}
+        {pointsQ.isPending && <p className="mt-4 text-sm text-graphite-500">{t('admin.loadingPoints', 'Loading QR points...')}</p>}
         {pointsQ.isError && <p className="mt-4 text-sm text-red-600">{(pointsQ.error as Error).message}</p>}
 
         {!pointsQ.isPending && !pointsQ.isError && (
@@ -354,11 +356,11 @@ export function AdminDashboardPage() {
               <Card key={point.id} className="space-y-1 p-4">
                 <p className="font-medium text-graphite-900">{point.name}</p>
                 <p className="text-sm text-graphite-500">{point.lat.toFixed(5)}, {point.lng.toFixed(5)}</p>
-                <p className="text-xs text-graphite-400">Created {new Date(point.created_at).toLocaleString()}</p>
+                <p className="text-xs text-graphite-400">{t('admin.createdAt', 'Created ')}{new Date(point.created_at).toLocaleString()}</p>
               </Card>
             ))}
             {(pointsQ.data ?? []).length === 0 && (
-              <p className="text-sm text-graphite-500">No QR points have been created yet.</p>
+              <p className="text-sm text-graphite-500">{t('admin.noPoints', 'No QR points have been created yet.')}</p>
             )}
           </div>
         )}

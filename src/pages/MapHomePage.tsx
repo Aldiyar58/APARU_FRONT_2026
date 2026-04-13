@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { BonusScreen } from '../features/bonus/BonusScreen'
 import { MapPane } from '../features/map/MapPane'
@@ -13,20 +13,23 @@ import { RouteSync } from '../features/ride/RouteSync'
 import { useQrSearchParams } from '../hooks/useQrSearchParams'
 import { fetchBonusSummary } from '../services/backend/bonusApi'
 import { fetchQrPoint } from '../services/backend/entryApi'
-import { getRide } from '../services/backend/rideApi'
+import { cancelRide, getRide } from '../services/backend/rideApi'
 import { fetchMe } from '../services/backend/userApi'
 import { useAuthStore } from '../store/authStore'
 import { useRideStore } from '../store/rideStore'
 import { useUiStore } from '../store/uiStore'
+import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
 export function MapHomePage() {
+  const { t } = useTranslation()
   const { search } = useLocation()
   const { pointId } = useQrSearchParams(search)
 
   const setQrContext = useRideStore((s) => s.setQrContext)
   const setPickupAddress = useRideStore((s) => s.setPickupAddress)
   const applyRide = useRideStore((s) => s.applyRide)
+  const resetRideSession = useRideStore((s) => s.resetRideSession)
   const rideId = useRideStore((s) => s.rideId)
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
 
@@ -41,6 +44,17 @@ export function MapHomePage() {
   const lastCompletedRide = useRef<number | null>(null)
 
   const validEntry = (pointId?.trim().length ?? 0) > 0
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => cancelRide(id),
+    onSuccess: () => {
+      pushToast(t('map.toastRideCancelled', 'Ride cancelled.'), 'info')
+      resetRideSession()
+    },
+    onError: () => {
+      pushToast(t('map.toastCancelFailed', 'Failed to cancel ride.'), 'error')
+    },
+  })
 
   const entryQ = useQuery({
     queryKey: ['qr-point', pointId],
@@ -74,9 +88,9 @@ export function MapHomePage() {
     }
 
     if (accessToken) {
-      pushToast('QR point retrieved.', 'success')
+      pushToast(t('map.toastQrRetrieved', 'QR point retrieved.'), 'success')
     } else {
-      pushToast('QR point retrieved. Sign in to order.', 'info')
+      pushToast(t('map.toastQrRetrievedSignin', 'QR point retrieved. Sign in to order.'), 'info')
     }
   }, [
     entryQ.isSuccess,
@@ -113,7 +127,7 @@ export function MapHomePage() {
     if (lastCompletedRide.current === rideQ.data.id) return
     lastCompletedRide.current = rideQ.data.id
 
-    pushToast(`Ride #${rideQ.data.id} completed.`, 'success')
+    pushToast(t('map.toastRideCompleted', 'Ride #{{id}} completed.', { id: rideQ.data.id }), 'success')
 
     if (!accessToken) return
 
@@ -141,7 +155,12 @@ export function MapHomePage() {
             entryAddress={entryQ.data?.name}
           />
         )}
-        {rideLifecycle !== 'idle' && rideLifecycle !== 'completed' && <RideStatusPanel />}
+        {rideLifecycle !== 'idle' && rideLifecycle !== 'completed' && (
+          <RideStatusPanel
+            onCancel={() => rideId && cancelMutation.mutate(rideId)}
+            isCanceling={cancelMutation.isPending}
+          />
+        )}
         <ConfirmRideModal />
         <CompletedOverlay />
       </main>

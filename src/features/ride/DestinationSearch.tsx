@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { GeocodeResultItem } from '../../services/aparuApi'
 import { geocode } from '../../services/aparuApi'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
@@ -10,6 +11,7 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
 
 export function DestinationSearch() {
+  const { t } = useTranslation()
   const pickup = useRideStore((s) => s.pickup)
   const destinationLabel = useRideStore((s) => s.destinationLabel)
   const setDestination = useRideStore((s) => s.setDestination)
@@ -57,7 +59,7 @@ export function DestinationSearch() {
           <Input
             value={q}
             disabled={blocked || !pickup}
-            placeholder="Куда едем?"
+            placeholder={t('search.placeholder', 'Куда едем?')}
             aria-autocomplete="list"
             aria-expanded={open}
             onFocus={() => setOpen(true)}
@@ -90,7 +92,7 @@ export function DestinationSearch() {
                 !geocodeQuery.isError &&
                 hits.length === 0 && (
                   <p className="px-4 py-3 text-sm text-graphite-500">
-                    Нет совпадений. Уточните запрос или выберите точку на карте.
+                    {t('search.noResults', 'Нет совпадений. Уточните запрос или выберите точку на карте.')}
                   </p>
                 )}
               {hits.map((hit, i) => (
@@ -121,12 +123,12 @@ export function DestinationSearch() {
               : 'border-graphite-200 bg-white text-graphite-700 active:bg-graphite-50 sm:hover:border-graphite-300',
           )}
         >
-          На карте
+          {t('search.onMapBtn', 'На карте')}
         </button>
       </div>
       {mapPick && (
         <p className="mt-2 text-xs text-aparu-dark">
-          Нажмите на карте, чтобы указать точку назначения
+          {t('search.mapPickHint', 'Нажмите на карте, чтобы указать точку назначения')}
         </p>
       )}
     </div>

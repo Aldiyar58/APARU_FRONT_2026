@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -8,18 +9,19 @@ import type { ReverseGeocodeResponse } from '../../services/aparuApi'
 import { DestinationSearch } from './DestinationSearch'
 import { useTripRoute } from './useTripRoute'
 import { cn } from '../../utils/cn'
+import { BsCash } from 'react-icons/bs'
 
 const TARIFFS: { value: Tariff; label: string; desc: string }[] = [
-  { value: 'economy', label: 'Эконом', desc: '150 ₸/км' },
-  { value: 'optimal', label: 'Оптимал', desc: '200 ₸/км' },
-  { value: 'comfort', label: 'Комфорт', desc: '250 ₸/км' },
-  { value: 'business', label: 'Бизнес', desc: '350 ₸/км' },
+  { value: 'economy', label: 'Эконом', desc: '350 ₸/км' },
+  { value: 'optimal', label: 'Оптимал', desc: '550 ₸/км' },
+  { value: 'comfort', label: 'Комфорт', desc: '600 ₸/км' },
+  { value: 'business', label: 'Бизнес', desc: '700 ₸/км' },
 ]
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'cash', label: 'Наличные' },
-  { value: 'kaspi', label: 'Kaspi' },
-  { value: 'halyq', label: 'Halyk' },
+const PAYMENT_METHODS: { value: PaymentMethod; label: string, icon: string }[] = [
+  { value: 'cash', label: 'Наличные', icon: 'cash' },
+  { value: 'kaspi', label: 'Kaspi', icon: 'payment/kaspi.webp' },
+  { value: 'halyq', label: 'Halyk', icon: 'payment/halyq.jpg' },
 ]
 
 export function HomeBottomSheet({
@@ -34,6 +36,7 @@ export function HomeBottomSheet({
   /** Адрес из `GET /api/v1/entry` (Aparu reverse-geocode на бэкенде) */
   entryAddress?: string | null
 }) {
+  const { t } = useTranslation()
   const pickup = useRideStore((s) => s.pickup)
   const pickupAddress = useRideStore((s) => s.pickupAddress)
   const destination = useRideStore((s) => s.destination)
@@ -67,7 +70,7 @@ export function HomeBottomSheet({
           'md:rounded-xl md:p-5 md:shadow-[var(--shadow-card)] md:ring-1 md:ring-graphite-100/80',
         )}
       >
-        <div className="flex max-h-[min(58dvh,480px)] flex-col md:max-h-none">
+        <div className="flex max-h-[min(40dvh,400px)] flex-col md:max-h-[400px]">
           <div
             className="flex shrink-0 justify-center pt-2.5 pb-1 md:hidden"
             aria-hidden
@@ -78,7 +81,7 @@ export function HomeBottomSheet({
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-y-contain px-4 pb-2 pt-1 [-webkit-overflow-scrolling:touch] md:overflow-visible md:p-0 md:pt-0">
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-graphite-400">
-                Откуда
+                {t('home.from', 'Откуда')}
               </p>
               {reverseLoading && (
                 <div className="mt-2 space-y-2">
@@ -91,7 +94,7 @@ export function HomeBottomSheet({
               )}
               {!reverseLoading && !reverseError && (
                 <p className="mt-1 text-base font-medium leading-snug text-graphite-900 sm:text-[17px]">
-                  {pickup ? displayAddress || 'Адрес получен' : 'Ожидаем точку QR'}
+                  {pickup ? displayAddress || t('home.addressReceived', 'Адрес получен') : t('home.awaitingQr', 'Ожидаем точку QR')}
                 </p>
               )}
             </div>
@@ -101,17 +104,17 @@ export function HomeBottomSheet({
             {/* Тариф */}
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-graphite-400">
-                Тариф
+                {t('home.tariff', 'Тариф')}
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                {TARIFFS.map((t) => (
+              <div className="flex gap-2 overflow-x-auto pb-1 snap-x [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {TARIFFS.map((tItem) => (
                   <button
-                    key={t.value}
+                    key={tItem.value}
                     type="button"
-                    onClick={() => setTariff(t.value)}
+                    onClick={() => setTariff(tItem.value)}
                     className={cn(
-                      'flex flex-col items-start rounded-xl border px-3 py-2.5 text-left transition-all duration-200',
-                      tariff === t.value
+                      'flex min-w-[100px] shrink-0 snap-start flex-col items-start rounded-xl border px-3 py-2.5 text-left transition-all duration-200 sm:min-w-0 sm:flex-1',
+                      tariff === tItem.value
                         ? 'border-aparu bg-aparu/8 ring-1 ring-aparu/30'
                         : 'border-graphite-200 bg-white active:bg-graphite-50 sm:hover:border-graphite-300',
                     )}
@@ -119,12 +122,12 @@ export function HomeBottomSheet({
                     <span
                       className={cn(
                         'text-sm font-semibold',
-                        tariff === t.value ? 'text-aparu-dark' : 'text-graphite-900',
+                        tariff === tItem.value ? 'text-aparu-dark' : 'text-graphite-900',
                       )}
                     >
-                      {t.label}
+                      {t(`confirm.tariff.${tItem.value}`, tItem.label)}
                     </span>
-                    <span className="text-xs text-graphite-500">{t.desc}</span>
+                    <span className="text-xs text-graphite-500">{t(`confirm.tariffDesc.${tItem.value}`, tItem.desc)}</span>
                   </button>
                 ))}
               </div>
@@ -133,7 +136,7 @@ export function HomeBottomSheet({
             {/* Способ оплаты */}
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-graphite-400">
-                Оплата
+                {t('home.payment', 'Оплата')}
               </p>
               <div className="flex gap-2">
                 {PAYMENT_METHODS.map((pm) => (
@@ -142,13 +145,20 @@ export function HomeBottomSheet({
                     type="button"
                     onClick={() => setPaymentMethod(pm.value)}
                     className={cn(
-                      'flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200',
+                      'flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 text-sm font-semibold transition-all duration-200',
                       paymentMethod === pm.value
                         ? 'border-aparu bg-aparu/8 text-aparu-dark ring-1 ring-aparu/30'
                         : 'border-graphite-200 bg-white text-graphite-700 active:bg-graphite-50 sm:hover:border-graphite-300',
                     )}
                   >
-                    {pm.label}
+                    <div className="flex h-5 items-center justify-center">
+                      {pm.value === 'cash' ? (
+                        <BsCash className={cn('h-5 w-auto', paymentMethod === pm.value ? 'text-aparu-dark' : 'text-graphite-500')} />
+                      ) : (
+                        <img src={`/${pm.icon}`} alt={pm.label} className="h-full w-auto object-contain mix-blend-multiply rounded-[2px]" />
+                      )}
+                    </div>
+                    <span>{t(`confirm.payment.${pm.value}`, pm.label)}</span>
                   </button>
                 ))}
               </div>
@@ -157,7 +167,7 @@ export function HomeBottomSheet({
             {destination && (
               <div className="flex flex-wrap items-center gap-3 rounded-xl bg-graphite-50 px-3 py-3 text-sm sm:px-4">
                 {routeQ.isFetching && (
-                  <span className="text-graphite-500">Маршрут…</span>
+                  <span className="text-graphite-500">{t('home.routing', 'Маршрут…')}</span>
                 )}
                 {routeQ.isError && (
                   <span className="text-red-600">
@@ -185,7 +195,7 @@ export function HomeBottomSheet({
               disabled={!canOrder}
               onClick={() => setConfirmOpen(true)}
             >
-              Заказать
+              {t('home.orderBtn', 'Заказать')}
             </Button>
             {destination && rideLifecycle === 'idle' && (
               <Button
@@ -193,7 +203,7 @@ export function HomeBottomSheet({
                 className="min-h-11 w-full md:min-h-0"
                 onClick={() => clearDestinationAndRoute()}
               >
-                Сбросить точку B
+                {t('home.resetBBtn', 'Сбросить точку B')}
               </Button>
             )}
           </div>

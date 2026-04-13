@@ -1,4 +1,5 @@
-﻿import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import {
@@ -11,11 +12,11 @@ import { useAuthStore } from '../../store/authStore'
 import { useUiStore } from '../../store/uiStore'
 import { cn } from '../../utils/cn'
 
-function transactionLabel(tx: BackendBonusTransaction): string {
-  if (tx.type === 'scan') return 'QR scan bonus'
-  if (tx.type === 'ride') return tx.ride_id != null ? `Ride #${tx.ride_id} bonus` : 'Ride bonus'
-  if (tx.type === 'redeem') return 'Redeemed points'
-  return 'Bonus update'
+function transactionLabel(tx: BackendBonusTransaction, t: any): string {
+  if (tx.type === 'scan') return t('bonus.txScan', 'QR scan bonus')
+  if (tx.type === 'ride') return tx.ride_id != null ? t('bonus.txRideId', 'Ride #{{id}} bonus', { id: tx.ride_id }) : t('bonus.txRide', 'Ride bonus')
+  if (tx.type === 'redeem') return t('bonus.txRedeem', 'Redeemed points')
+  return t('bonus.txUpdate', 'Bonus update')
 }
 
 export function BonusScreen({
@@ -29,6 +30,7 @@ export function BonusScreen({
   const bonusBalance = useAuthStore((s) => s.bonusBalance)
   const setBonusBalance = useAuthStore((s) => s.setBonusBalance)
   const pushToast = useUiStore((s) => s.pushToast)
+  const { t } = useTranslation()
 
   const summaryQ = useQuery({
     queryKey: ['bonus-summary', token],
@@ -40,7 +42,7 @@ export function BonusScreen({
     mutationFn: redeemBonus,
     onSuccess: async (data, points) => {
       setBonusBalance(data.new_balance)
-      pushToast(`Redeemed ${points} points for ${data.discount_percent}% discount.`, 'success')
+      pushToast(t('bonus.redeemedToast', 'Redeemed {{points}} points for {{discount}}% discount.', { points, discount: data.discount_percent }), 'success')
       await queryClient.invalidateQueries({ queryKey: ['bonus-summary'] })
     },
     onError: (error) => {
@@ -67,9 +69,9 @@ export function BonusScreen({
         )}
       >
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wider text-graphite-400">Balance</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-graphite-400">{t('bonus.balanceLabel', 'Balance')}</p>
           <p className="truncate text-2xl font-semibold tracking-tight text-graphite-900 sm:text-3xl">
-            {balance} <span className="text-base font-medium text-graphite-500 sm:text-lg">points</span>
+            {balance} <span className="text-base font-medium text-graphite-500 sm:text-lg">{t('bonus.pointsLabel', 'points')}</span>
           </p>
         </div>
         <Button
@@ -77,7 +79,7 @@ export function BonusScreen({
           className="min-h-11 shrink-0 px-3 text-sm sm:min-h-0"
           onClick={onClose}
         >
-          Close
+          {t('bonus.closeBtn', 'Close')}
         </Button>
       </div>
 
@@ -89,7 +91,7 @@ export function BonusScreen({
       >
         {!token && (
           <Card className="p-5 text-sm leading-relaxed text-graphite-600">
-            Sign in to view your real server-side bonus history and redeem points.
+            {t('bonus.unauthDesc', 'Sign in to view your real server-side bonus history and redeem points.')}
           </Card>
         )}
 
@@ -97,7 +99,7 @@ export function BonusScreen({
           <>
             <Card className="mb-6 p-4">
               <p className="text-sm leading-relaxed text-graphite-600">
-                Server-backed bonuses are now live. QR scans, ride completions, and redemptions come directly from the backend.
+                {t('bonus.authDesc', 'Server-backed bonuses are now live. QR scans, ride completions, and redemptions come directly from the backend.')}
               </p>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button
@@ -105,7 +107,7 @@ export function BonusScreen({
                   disabled={redeemMutation.isPending || balance < 100}
                   onClick={() => redeemMutation.mutate(100)}
                 >
-                  Redeem 100 pts
+                  {t('bonus.redeem100', 'Redeem 100 pts')}
                 </Button>
                 <Button
                   variant="secondary"
@@ -113,13 +115,13 @@ export function BonusScreen({
                   disabled={redeemMutation.isPending || balance < 300}
                   onClick={() => redeemMutation.mutate(300)}
                 >
-                  Redeem 300 pts
+                  {t('bonus.redeem300', 'Redeem 300 pts')}
                 </Button>
               </div>
             </Card>
 
             {summaryQ.isPending && (
-              <Card className="p-4 text-sm text-graphite-500">Loading bonus history...</Card>
+              <Card className="p-4 text-sm text-graphite-500">{t('bonus.loadingHistory', 'Loading bonus history...')}</Card>
             )}
 
             {summaryQ.isError && (
@@ -128,16 +130,16 @@ export function BonusScreen({
 
             {!summaryQ.isPending && !summaryQ.isError && (
               <>
-                <h2 className="mb-3 text-sm font-semibold text-graphite-800">History</h2>
+                <h2 className="mb-3 text-sm font-semibold text-graphite-800">{t('bonus.historyTitle', 'History')}</h2>
                 <ul className="flex flex-col gap-2">
                   {transactions.length === 0 && (
-                    <Card className="p-4 text-center text-sm text-graphite-500">No bonus activity yet.</Card>
+                    <Card className="p-4 text-center text-sm text-graphite-500">{t('bonus.noActivity', 'No bonus activity yet.')}</Card>
                   )}
                   {transactions.map((tx) => (
                     <li key={tx.id}>
                       <Card className="flex items-center justify-between gap-3 p-4">
                         <div className="min-w-0">
-                          <p className="font-medium text-graphite-900">{transactionLabel(tx)}</p>
+                          <p className="font-medium text-graphite-900">{transactionLabel(tx, t)}</p>
                           <p className="text-xs text-graphite-400">{new Date(tx.created_at).toLocaleString()}</p>
                         </div>
                         <span

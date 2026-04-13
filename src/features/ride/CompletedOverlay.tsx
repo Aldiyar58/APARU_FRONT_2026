@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { MdCheck } from 'react-icons/md'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -5,6 +6,7 @@ import { useRideStore } from '../../store/rideStore'
 import { cn } from '../../utils/cn'
 
 export function CompletedOverlay() {
+  const { t } = useTranslation()
   const rideLifecycle = useRideStore((s) => s.rideLifecycle)
   const resetRideSession = useRideStore((s) => s.resetRideSession)
 
@@ -15,7 +17,7 @@ export function CompletedOverlay() {
       className="fixed inset-0 z-[1600] flex items-end justify-center bg-graphite-900/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-4 sm:backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Поездка завершена"
+      aria-label={t('completed.title', 'Поездка завершена')}
     >
       <Card
         className={cn(
@@ -32,11 +34,10 @@ export function CompletedOverlay() {
           </div>
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-graphite-900 sm:text-2xl">
-              Поездка завершена
+              {t('completed.title', 'Поездка завершена')}
             </h2>
             <p className="mt-2 text-sm text-graphite-500">
-              Спасибо, что выбрали APARU. Скачайте приложение для бонусов и истории
-              поездок.
+              {t('completed.desc', 'Спасибо, что выбрали APARU. Скачайте приложение для бонусов и истории поездок.')}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -46,14 +47,14 @@ export function CompletedOverlay() {
                 window.open('https://aparu.kz', '_blank', 'noopener,noreferrer')
               }
             >
-              Скачать приложение
+              {t('completed.downloadBtn', 'Скачать приложение')}
             </Button>
             <Button
               variant="secondary"
               className="min-h-12 w-full sm:min-h-0"
               onClick={() => resetRideSession()}
             >
-              Новая поездка
+              {t('completed.newRideBtn', 'Новая поездка')}
             </Button>
           </div>
         </div>

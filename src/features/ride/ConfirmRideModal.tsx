@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaCreditCard, FaLock, FaTaxi } from 'react-icons/fa6'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -19,10 +20,10 @@ const TARIFF_LABELS: Record<string, string> = {
 }
 
 const TARIFF_COEFS: Record<string, number> = {
-  economy: 150,
-  optimal: 200,
-  comfort: 250,
-  business: 350,
+  economy: 350,
+  optimal: 550,
+  comfort: 600,
+  business: 700,
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -32,6 +33,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 }
 
 export function ConfirmRideModal() {
+  const { t } = useTranslation()
   const open = useRideStore((s) => s.confirmOpen)
   const setConfirmOpen = useRideStore((s) => s.setConfirmOpen)
   const pickup = useRideStore((s) => s.pickup)
@@ -105,7 +107,7 @@ export function ConfirmRideModal() {
       .then((response) => {
         if (response.route) setRoute(response.route)
         applyRide(response.ride)
-        pushToast(`Поездка #${response.ride.id} создана.`, 'success')
+        pushToast(t('ride.createdToast', 'Поездка #{{id}} создана.', { id: response.ride.id }), 'success')
       })
       .catch((error) => {
         pushToast((error as Error).message, 'error')
@@ -148,27 +150,27 @@ export function ConfirmRideModal() {
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-2 pt-2 [-webkit-overflow-scrolling:touch] sm:overflow-visible sm:p-0 sm:pt-0">
             <h2 id="confirm-title" className="text-lg font-semibold tracking-tight text-graphite-900 sm:text-xl">
-              Подтверждение поездки
+              {t('confirm.title', 'Подтверждение поездки')}
             </h2>
             <p className="mt-2 text-sm text-graphite-500">
-              Проверьте данные и нажмите «Подтвердить» для создания заказа.
+              {t('confirm.desc', 'Проверьте данные и нажмите «Подтвердить» для создания заказа.')}
             </p>
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">A</span>
-                <span className="min-w-0 break-words text-graphite-800">{pickupAddress || 'Точка подачи'}</span>
+                <span className="min-w-0 break-words text-graphite-800">{pickupAddress || t('confirm.pickup', 'Точка подачи')}</span>
               </li>
               <li className="flex gap-2">
                 <span className="shrink-0 font-medium text-graphite-400">B</span>
-                <span className="min-w-0 break-words text-graphite-800">{destinationLabel || 'Место назначения'}</span>
+                <span className="min-w-0 break-words text-graphite-800">{destinationLabel || t('confirm.destination', 'Место назначения')}</span>
               </li>
               <li className="flex gap-2 items-center">
                 <span className="shrink-0 font-medium text-graphite-400"><FaTaxi /></span>
-                <span className="text-graphite-800">{TARIFF_LABELS[tariff] ?? tariff}</span>
+                <span className="text-graphite-800">{t(`confirm.tariff.${tariff}`, TARIFF_LABELS[tariff] ?? tariff)}</span>
               </li>
               <li className="flex gap-2 items-center">
                 <span className="shrink-0 font-medium text-graphite-400"><FaCreditCard /></span>
-                <span className="text-graphite-800">{PAYMENT_LABELS[paymentMethod] ?? paymentMethod}</span>
+                <span className="text-graphite-800">{t(`confirm.payment.${paymentMethod}`, PAYMENT_LABELS[paymentMethod] ?? paymentMethod)}</span>
               </li>
               <li className="flex flex-wrap gap-2 pt-1 text-graphite-600">
                 <span className="font-semibold text-graphite-900">{formatDistanceMeters(route?.Distance)}</span>
@@ -189,7 +191,7 @@ export function ConfirmRideModal() {
             {isGuest && (
               <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
                 <p className="mb-3 text-sm font-medium text-amber-800 flex items-center gap-1.5">
-                  <FaLock className="shrink-0" /> Для создания заказа необходимо войти в аккаунт
+                  <FaLock className="shrink-0" /> {t('confirm.authRequired', 'Для создания заказа необходимо войти в аккаунт')}
                 </p>
 
                 {authStep === 'phone' && (
@@ -210,7 +212,7 @@ export function ConfirmRideModal() {
                           const r = await sendOtpCode(phone.trim())
                           setTtl(r.ttl_seconds)
                           setAuthStep('code')
-                          pushToast('Код отправлен', 'success')
+                          pushToast(t('auth.codeSent', 'Код отправлен'), 'success')
                         } catch (e) {
                           pushToast((e as Error).message, 'error')
                         } finally {
@@ -218,7 +220,7 @@ export function ConfirmRideModal() {
                         }
                       }}
                     >
-                      {authBusy ? 'Отправка...' : 'Получить код'}
+                      {authBusy ? t('confirm.sending', 'Отправка...') : t('auth.getCode', 'Получить код')}
                     </Button>
                   </div>
                 )}
@@ -242,7 +244,7 @@ export function ConfirmRideModal() {
                           const r = await verifyOtp(phone.trim(), code.trim())
                           setPendingOrder(true)
                           setSession(r.access_token)
-                          pushToast('Вы авторизованы! Создаём заказ...', 'success')
+                          pushToast(t('confirm.authSuccess', 'Вы авторизованы! Создаём заказ...'), 'success')
                         } catch (e) {
                           pushToast((e as Error).message, 'error')
                         } finally {
@@ -250,7 +252,7 @@ export function ConfirmRideModal() {
                         }
                       }}
                     >
-                      {authBusy ? 'Проверка...' : 'Войти и заказать'}
+                      {authBusy ? t('confirm.checking', 'Проверка...') : t('confirm.loginAndOrder', 'Войти и заказать')}
                     </Button>
                     <div className="flex items-center justify-between">
                       <button
@@ -258,11 +260,11 @@ export function ConfirmRideModal() {
                         className="text-xs text-graphite-500 hover:underline"
                         onClick={() => setAuthStep('phone')}
                       >
-                        Изменить номер
+                        {t('auth.changePhone', 'Изменить номер')}
                       </button>
                       {ttl != null && ttl > 0 && (
                         <p className="text-xs text-graphite-500">
-                          Код действует {ttl} сек.
+                          {t('auth.codeValid', 'Код действует {{ttl}} сек.', { ttl })}
                         </p>
                       )}
                     </div>
@@ -279,7 +281,7 @@ export function ConfirmRideModal() {
                   disabled={submitting}
                   onClick={async () => {
                     if (!pickup || !destination) {
-                      pushToast('Укажите обе точки маршрута.', 'error')
+                      pushToast(t('confirm.errPoints', 'Укажите обе точки маршрута.'), 'error')
                       return
                     }
 
@@ -289,17 +291,17 @@ export function ConfirmRideModal() {
                       const apiCall = qrPointId
                         ? createRideFromQr({ qrPointId, pointB: destination, tariff, paymentMethod })
                         : createRide({
-                            pointA: pickup,
-                            pointB: destination,
-                            tariff,
-                            paymentMethod,
-                          })
+                          pointA: pickup,
+                          pointB: destination,
+                          tariff,
+                          paymentMethod,
+                        })
                       const response = await apiCall
                       if (response.route) {
                         setRoute(response.route)
                       }
                       applyRide(response.ride)
-                      pushToast(`Поездка #${response.ride.id} создана.`, 'success')
+                      pushToast(t('ride.createdToast', 'Поездка #{{id}} создана.', { id: response.ride.id }), 'success')
                     } catch (error) {
                       pushToast((error as Error).message, 'error')
                     } finally {
@@ -307,7 +309,7 @@ export function ConfirmRideModal() {
                     }
                   }}
                 >
-                  {submitting ? 'Создание...' : 'Подтвердить'}
+                  {submitting ? t('confirm.creating', 'Создание...') : t('confirm.submit', 'Подтвердить')}
                 </Button>
               )}
               <Button
@@ -316,7 +318,7 @@ export function ConfirmRideModal() {
                 disabled={submitting}
                 onClick={() => setConfirmOpen(false)}
               >
-                Назад
+                {t('confirm.back', 'Назад')}
               </Button>
             </div>
           </div>
