@@ -28,30 +28,30 @@ export function AppHeader() {
         </span>
         <div className="pointer-events-auto mt-2.5 flex flex-col gap-2.5 text-sm font-semibold sm:flex-row sm:items-center sm:gap-5 sm:text-base">
           <div className="flex flex-wrap items-center gap-4">
-          {!token && (
+            {/* {!token && (
             <Link className="text-aparu-dark hover:underline" to="/auth/login">
               {t('header.login', 'Войти')}
             </Link>
-          )}
-          {token && role === 'admin' && (
-            <Link className="text-aparu-dark hover:underline" to="/admin/dashboard">
-              {t('header.admin', 'Админ')}
-            </Link>
-          )}
-          {token && role === 'driver' && (
-            <Link className="text-aparu-dark hover:underline" to="/driver/active-rides">
-              {t('header.driver', 'Водитель')}
-            </Link>
-          )}
-          {token && (
-            <button
-              type="button"
-              className="text-graphite-500 hover:text-graphite-800"
-              onClick={() => clearSession()}
-            >
-              {t('header.logout', 'Выйти')}
-            </button>
-          )}
+          )} */}
+            {token && role === 'admin' && (
+              <Link className="text-aparu-dark hover:underline" to="/admin/dashboard">
+                {t('header.admin', 'Админ')}
+              </Link>
+            )}
+            {token && role === 'driver' && (
+              <Link className="text-aparu-dark hover:underline" to="/driver/active-rides">
+                {t('header.driver', 'Водитель')}
+              </Link>
+            )}
+            {token && (
+              <button
+                type="button"
+                className="text-graphite-500 hover:text-graphite-800"
+                onClick={() => clearSession()}
+              >
+                {t('header.logout', 'Выйти')}
+              </button>
+            )}
           </div>
           <button
             type="button"
