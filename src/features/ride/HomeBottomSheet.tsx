@@ -70,7 +70,7 @@ export function HomeBottomSheet({
           'md:rounded-xl md:p-5 md:shadow-[var(--shadow-card)] md:ring-1 md:ring-graphite-100/80',
         )}
       >
-        <div className="flex max-h-[min(58dvh,480px)] flex-col md:max-h-none">
+        <div className="flex max-h-[min(40dvh,400px)] flex-col md:max-h-[400px]">
           <div
             className="flex shrink-0 justify-center pt-2.5 pb-1 md:hidden"
             aria-hidden
@@ -106,14 +106,14 @@ export function HomeBottomSheet({
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-graphite-400">
                 {t('home.tariff', 'Тариф')}
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-1 snap-x [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {TARIFFS.map((tItem) => (
                   <button
                     key={tItem.value}
                     type="button"
                     onClick={() => setTariff(tItem.value)}
                     className={cn(
-                      'flex flex-col items-start rounded-xl border px-3 py-2.5 text-left transition-all duration-200',
+                      'flex min-w-[100px] shrink-0 snap-start flex-col items-start rounded-xl border px-3 py-2.5 text-left transition-all duration-200 sm:min-w-0 sm:flex-1',
                       tariff === tItem.value
                         ? 'border-aparu bg-aparu/8 ring-1 ring-aparu/30'
                         : 'border-graphite-200 bg-white active:bg-graphite-50 sm:hover:border-graphite-300',

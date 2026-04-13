@@ -17,17 +17,17 @@ export function AppHeader() {
 
   return (
     <header
-      className="pointer-events-none absolute left-0 right-0 top-0 z-[1000] flex items-start justify-between gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] pb-2 sm:gap-3 sm:p-4 sm:pt-4"
+      className="pointer-events-none absolute left-0 right-0 top-0 z-[1000] flex items-start justify-between gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] pb-4 sm:p-6 sm:pt-6"
     >
-      <div className="pointer-events-auto flex min-w-0 flex-col gap-0.5 sm:gap-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-graphite-400 sm:text-[11px]">
+      <div className="pointer-events-auto flex min-w-0 flex-col gap-1 sm:gap-1.5">
+        <span className="text-xs font-bold uppercase tracking-widest text-graphite-500 sm:text-sm">
           {t('header.brand', 'APARU')}
         </span>
-        <span className="truncate text-base font-semibold tracking-tight text-graphite-900 sm:text-lg">
+        <span className="truncate text-2xl font-bold tracking-tight text-graphite-900 sm:text-3xl leading-none">
           {t('header.title', 'QR Taxi')}
         </span>
-        <div className="pointer-events-auto mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold flex-col sm:flex-row sm:text-xs">
-          <div className="flex gap-x-3">
+        <div className="pointer-events-auto mt-2.5 flex flex-col gap-2.5 text-sm font-semibold sm:flex-row sm:items-center sm:gap-5 sm:text-base">
+          <div className="flex flex-wrap items-center gap-4">
           {!token && (
             <Link className="text-aparu-dark hover:underline" to="/auth/login">
               {t('header.login', 'Войти')}
@@ -56,7 +56,7 @@ export function AppHeader() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="text-aparu-primary hover:text-aparu-dark font-bold underline decoration-dotted underline-offset-2"
+            className="text-aparu-primary hover:text-aparu-dark font-bold underline decoration-dotted underline-offset-4 self-start sm:self-auto"
           >
             {i18n.language === 'ru' ? 'ҚАЗ' : 'РУС'}
           </button>
